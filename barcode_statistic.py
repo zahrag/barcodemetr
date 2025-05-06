@@ -1,3 +1,5 @@
+import os
+import argparse
 from tabulate import tabulate
 import numpy as np
 from tqdm import tqdm
@@ -11,19 +13,12 @@ from barcode_pwd_spark import BarcodePWD as bar_PWD_spark
 # Get the path of the currently running script
 current_directory = Path(__file__).parent
 
-def convert_to_regular_dict(d):
-    if isinstance(d, defaultdict):
-        d = {k: convert_to_regular_dict(v) for k, v in d.items()}
-    elif isinstance(d, dict):
-        d = {k: convert_to_regular_dict(v) for k, v in d.items()}
-    return d
-
 class BarcodeMetric:
 
     def __init__(self, metadata_file="", method="pandas"):
         self.metadata = metadata_file
         self.df = self._read_metadata()
-        self.taxonomy_ranks = ["dna_bin", "species", "genus", "subfamily", "family", "order", "class", "phylum"]
+        self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species", "dna_bin"]
 
         if method == "pandas":
             self.pwd = bar_PWD_panda()
@@ -34,7 +29,15 @@ class BarcodeMetric:
     def _read_metadata(self):
         return pd.read_csv(self.metadata, low_memory=False)
 
-    def _generate_hierarchy(self, df=None, taxonomy_ranks=None):
+    def _convert(self, default_dict):
+        return self.convert_to_regular_dict(default_dict)
+
+    def _sdi(self, sample_counts):
+        proportions = np.array(sample_counts) / sum(sample_counts)
+        sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
+        return sdi
+
+    def build_hierarchy(self, df=None, taxonomy_ranks=None):
 
         df = df if df is not None else self.df
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
@@ -53,14 +56,6 @@ class BarcodeMetric:
                     subgroup_entry['barcodes'][barcode]['samples'].append(sample)
 
         return data_hierarchy
-
-    def _convert(self, default_dict):
-        return convert_to_regular_dict(default_dict)
-
-    def _sdi(self, sample_counts):
-        proportions = np.array(sample_counts) / sum(sample_counts)
-        sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
-        return sdi
 
     def compute_sdi(self, data_hierarchy):
         """
@@ -101,6 +96,8 @@ class BarcodeMetric:
                 'Average Shannon Diversity Index': np.mean(sdi_lst),
                 'Std.Dev Shannon Diversity Index': np.std(sdi_lst),
             }
+
+        print(f"Identical DNA Barcode Statistics: {barcode_stats}")
         return barcode_stats
 
     def compute_pwd(self, data_hierarchy, taxonomy_ranks=None):
@@ -117,6 +114,8 @@ class BarcodeMetric:
         for rank in ranks:
             if rank in data_hierarchy:
                 pwd_stats[rank] = self.pwd._rank_dist_stats(data_hierarchy[rank], rank)
+
+        print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
     def compute_full_statistics(self, data_hierarchy):
@@ -129,7 +128,7 @@ class BarcodeMetric:
         ranks = list(data_hierarchy.keys())
 
         for rank in ranks:
-            s_dict['DNA Statistics'].append(rank)
+            s_dict['Barcode Statistics'].append(rank)
 
             # Merge per-rank statistics
             merged_stats = {**barcode_stats.get(rank, {}), **pwd_stats.get(rank, {})}
@@ -137,16 +136,22 @@ class BarcodeMetric:
             for key, value in merged_stats.items():
                 s_dict[key].append(round(value, 4))
 
-            print(f'Statistics of {rank} processed and collected.')
-        self.print_table(s_dict, "Barcode Statistics", print_table=True)
+            print(f'Full Statistics of {rank} processed and collected.')
 
         return s_dict
 
-    def print_table(self, data_dict, title, print_table=False):
+    @staticmethod
+    def convert_to_regular_dict(d):
+        if isinstance(d, defaultdict):
+            d = {k: BarcodeMetric.convert_to_regular_dict(v) for k, v in d.items()}
+        elif isinstance(d, dict):
+            d = {k: BarcodeMetric.convert_to_regular_dict(v) for k, v in d.items()}
+        return d
 
-        if not print_table:
+    @staticmethod
+    def print_table(data_dict, title, display_table=False):
+        if not display_table:
             return
-
         print("\n\n" + "+" + "-" * 143 + "+")
         print(f"\t\t\t\t\t{title}")
         headings = list(data_dict.keys())
@@ -158,17 +163,47 @@ class BarcodeMetric:
         ]
         print(tabulate(formatted_rows, headers=headings, tablefmt="grid"))
 
+    @staticmethod
+    def save_statistics_to_tsv(data_dict, filename="statistics.tsv"):
+        df = pd.DataFrame(data_dict)
+        df.to_csv(filename, sep='\t', index=False)
+        print(f"Saved statistics to {filename}")
 
-def main():
-    barmetr = BarcodeMetric(metadata="", method="spark")
-    hierarchy = barmetr._generate_hierarchy()
+
+def main(metadata_file, method="spark"):
+
+    barmetr = BarcodeMetric(metadata_file=metadata_file, method=method)
+
+    # Create data hierarchy from metadata
+    hierarchy = barmetr.build_hierarchy()
+
+    # Compute Shannon Diversity Index (SDI) inplace
     hierarchy = barmetr.compute_sdi(hierarchy)
 
-    barmetr.compute_pwd(hierarchy, rank="species")
+    # Compute and save in parquets identical DNA pairwise distances
+    barmetr.compute_pwd(hierarchy)
+
+    # Compute the full statistics of the identical DNA barcodes
+    barcode_stats = barmetr.compute_full_statistics(hierarchy)
+
+    # Print full statistics
+    barmetr.print_table(barcode_stats, "Full Statistics of Identical DNA Barcodes", display_table=True)
+
+    barmetr. save_statistics_to_tsv(barcode_stats, filename=os.path.join(os.path.dirname(metadata_file),"barcode_stats.tsv"))
+
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(description="Compute DNA Barcode Statistics")
+
+    parser.add_argument("metadata_file", type=str, help="Path to the metadata CSV file")
+    parser.add_argument("--method", type=str, choices=["pandas", "spark"], default="spark",
+                        help="Method to use for processing (pandas or spark)")
+
+    # Parse the arguments
+    args = parser.parse_args()
+    main(args.metadata_file, args.method)
 
 
 
