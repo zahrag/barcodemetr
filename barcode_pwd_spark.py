@@ -181,7 +181,10 @@ class BarcodePWD(object):
         name, barcodes = item
 
         # Random sampling
-        sequences = random.sample(barcodes, max_barcodes) if len(barcodes) > max_barcodes else barcodes
+        if (max_barcodes > 0) and (len(barcodes) > max_barcodes):
+            sequences = random.sample(barcodes, max_barcodes)
+        else:  # species
+            sequences = barcodes
 
         # Perform alignment
         aligned_sequences = perform_mafft_alignment(sequences, name)
@@ -198,7 +201,15 @@ class BarcodePWD(object):
 
         return (name, distances)
 
-    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, chunk_size=1000):
+    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000):
+        """
+          This function process distance computation per taxonomic rank using pandas.
+          :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
+          :param rank: Taxonomic group level (e.g., family, genus, species).
+          :param min_barcodes: Minimum number of barcodes per rank to compute pairwise distances.
+          :param max_barcodes: Maximum number of barcodes per rank randomly sampled to compute pairwise distances.
+          :param chunk_size: Chunk size of the subgroups of the rank.
+          """
 
         # Convert the dictionary to a list of tuples [(species, sequences), ...]
         print(f'Processing DNA barcodes pairwise distances across {rank} ...')
@@ -214,7 +225,7 @@ class BarcodePWD(object):
                              ]
 
         chk_ended = 0
-        max_barcodes = 1000
+        max_barcodes = 0 if rank == 'species' else max_barcodes  # Process all barcodes of the species
         for chk in range(len(tuple_chunks)):
 
             if chk < chk_ended:
@@ -233,23 +244,28 @@ class BarcodePWD(object):
                 distances = distances.withColumn("distance", col("distance").cast("float"))
                 final_distances = distances if final_distances is None else final_distances.union(distances)
 
-            # ---- Save the DataFrame to Parquet
+            # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
             distances_dir = f"{current_directory}/distances/{rank}/chunk_{chk}"
             self._save_in_parquet(final_distances, distances_dir, _save=True)
             print('')
 
-    def _rank_dist_stats(self, rank, max_chk=10):
+    def _rank_dist_stats(self, rank, max_chunk=10):
+        """
+        Compute pairwise distance statistics across taxonomic levels.
+        :param rank: Taxonomic group level (e.g., family, genus, species).
+        :param max_chunk: Maximum number of chunks of the subgroups of the rank.
+        """
 
         rank_distances_dir = f"{current_directory}/distances/{rank}"
         if not os.path.exists(rank_distances_dir):
-            print(f"The directory does NOT contain distances files of {rank}")
-            return
-
+            raise ValueError (f"The directory of distances files of {rank} does NOT exist.\n "
+                              f"Compute pairwise distances across {rank} first."
+                              )
         print(f'Processing DNA barcodes statistics across {rank} ...')
 
         rank_stats = None
         df_spark = None
-        for chk in tqdm(range(max_chk), total=max_chk, desc="Processing statistics"):
+        for chk in tqdm(range(max_chunk), total=max_chunk, desc="Processing statistics"):
 
             distances_dir = os.path.join(rank_distances_dir, f"chunk_{chk}")
             if not os.path.exists(distances_dir):

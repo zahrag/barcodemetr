@@ -12,30 +12,15 @@ from pathlib import Path
 # Get the path of the currently running script
 current_directory = Path(__file__).parent
 
-def make_directory(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-def make_tsv(df, name=None, path=None):
-    df_ = pd.DataFrame(df)
-    df_.reset_index(inplace=True, drop=True)
-    df_.to_csv(os.path.join(path, name), sep='\t', index=False)
-
 def read_tsv(tsv_file):
     df = pd.read_csv(tsv_file, sep='\t', low_memory=False)
     return df
 
 class BarcodePWD(object):
-    """ Pairwise distance analysis of identical DNA barcode sequences using 'Damerau-Levenshtein Distance' """
-    def __init__(self):
 
-        self.min_seq_num = 3
-        self.group_chunk_size = 1000
-        self.seq_chunk_size = 1000
-
-    def _pwd(self, aligned_sequences):
+    def _damerau_levenshtein_distance(self, aligned_sequences):
         """
-        This function implements Damerau-Levenshtein distance using Pandas.
+        This function implements Damerau-Levenshtein distance.
 
         Damerau-Levenshtein distance represents how many edits are needed to transform one sequence into another,
         where an edit can be an insertion, deletion, substitution, or transposition of adjacent characters (nucleotides).
@@ -58,53 +43,54 @@ class BarcodePWD(object):
 
         return unique_distances_df[["sequence", "sequence2", "distance"]]
 
-    def _subgroup_distances(self, item, max_len=1000):
+    def _subgroup_distances(self, item, max_barcodes=1000):
 
-        name, sequences = item
+        name, barcodes = item
 
         # Random sampling
-        if max_len > 0:
-            sequences = random.sample(sequences, max_len) if len(sequences) > max_len else sequences
+        if (max_barcodes > 0) and (len(barcodes) > max_barcodes):
+            sequences = random.sample(barcodes, max_barcodes)
+        else:   # species
+            sequences = barcodes
 
         # Perform alignment
         aligned_sequences = perform_mafft_alignment(sequences, name)
 
         # Compute pairwise distances
-        distances = self._pwd(aligned_sequences)
+        distances = self._damerau_levenshtein_distance(aligned_sequences)
 
         return (name, distances)
 
-    def _rank_distances(self, data_dict, rank, process=False):
+    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000):
         """
         This function process distance computation per taxonomic rank using pandas.
+        :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
+        :param rank: Taxonomic group level (e.g., family, genus, species).
+        :param min_barcodes: Minimum number of barcodes per rank to compute pairwise distances.
+        :param max_barcodes: Maximum number of barcodes per rank randomly sampled to compute pairwise distances.
+        :param chunk_size: Chunk size of the subgroups of the rank.
         """
-
-        if not process:
-            return
 
         # Convert the dictionary to a list of tuples [(species, sequences), ...]
         print(f'Processing DNA barcodes pairwise distances across {rank} ...')
 
-        # Process all DNA barcode sequences of the taxonomic rank (e.g., species)
-        self.seq_chunk_size = 0 if rank == 'species' else self.seq_chunk_size
+        tuple_list = [
+            (subgroup, list(subgroup_entry['barcodes'].keys()))
+            for subgroup, subgroup_entry in rank_hierarchy.items()
+            if len(subgroup_entry['barcodes']) > min_barcodes
+        ]
+        # Create chunks of subgroups
+        tuple_chunks = [tuple_list[i:i + chunk_size]
+                        for i in range(0, len(tuple_list), chunk_size)
+                        ]
 
-        tuple_list = [(group_name, data['unique_barcodes'])
-                      for group_name, data in data_dict.items()
-                      if len(data['unique_barcodes']) > self.min_seq_num ]
-
-        tuple_chunks = [tuple_list[i:i + self.group_chunk_size] for i in range(0, len(tuple_list), self.group_chunk_size)]
-
-
-        chk_ended = 0
+        max_barcodes = 0 if rank == 'species' else max_barcodes     # Process all barcodes of the species
         for chk, chunk in enumerate(tuple_chunks):
-
-            if chk < chk_ended:
-                continue
 
             final_distances = None
             for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing groups"):
 
-                group_name, df = self._subgroup_distances(item, max_len=self.seq_chunk_size)
+                group_name, df = self._subgroup_distances(item, max_barcodes=max_barcodes)
 
                 df['group_name'] = group_name
                 df['distance'] = df['distance'].astype(float)
@@ -113,29 +99,32 @@ class BarcodePWD(object):
                 final_distances = df[['distance', 'group_name']].copy() if final_distances is None \
                     else pd.concat([final_distances, df[['distance', 'group_name']]], ignore_index=True)
 
-            # ---- Save the DataFrame to TSV format
+            # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
             distances_dir = os.path.join(current_directory, 'distances', rank)
-            make_directory(distances_dir)
-            make_tsv(final_distances, name=f'barcode_pwd_{rank}_chunk_{chk}.tsv', path=distances_dir)
+            if not os.path.exists(distances_dir):
+                os.makedirs(distances_dir)
+            final_distances.reset_index(inplace=True, drop=True)
+            final_distances.to_csv(os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.tsv'), sep='\t', index=False)
 
+    def _rank_dist_stats(self, rank):
 
-    def _rank_statistics(self, rank, max_chk=10, process=False):
+        """
+        Compute pairwise distance statistics across taxonomic levels.
+        :param rank: Taxonomic group level (e.g., family, genus, species).
+        """
 
-        if not process:
-            return None
+        distances_dir = os.path.join(current_directory, 'distances', rank)
+        chks = self.extract_chunks(rank, distances_dir)
 
         print(f'Processing DNA barcodes statistics across {rank} ...')
 
         rank_stats = None
         df_pandas = None
-        for chk in tqdm(range(max_chk), total=max_chk, desc="Processing statistics"):
+        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc="Processing statistics"):
 
-            distances_dir = os.path.join(current_directory, 'distances', rank)
             distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.tsv')
-            if not os.path.exists(distances_dir):
-                continue
-
             df = read_tsv(distances_tsv)
+
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
 
             # Group by 'group_name' and calculate statistics for each group of the chunk
@@ -180,5 +169,21 @@ class BarcodePWD(object):
         }
 
         return rank_stats_dict
+
+    @staticmethod
+    def extract_chunks(rank, dists_dir):
+        dists_dir = Path(dists_dir)
+
+        if not dists_dir.exists():
+            raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n"
+                             f"Compute pairwise distances across {rank} first.")
+
+        chk_values = [
+            int(f.name.split("_chunk_")[1].split(".")[0])
+            for f in dists_dir.iterdir()
+            if f.name.startswith(f"barcode_pwd_{rank}_chunk_") and f.name.endswith(".tsv")
+        ]
+        return chk_values
+
 
 
