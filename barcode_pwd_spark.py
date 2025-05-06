@@ -176,9 +176,16 @@ class BarcodePWD(object):
             "max": results["max"],
         }
 
-    def _subgroup_dist(self, item, max_barcodes=1000, _subgroups_stats=False):
+    def _subgroup_dists(self, subgroup, max_barcodes=1000, _subgroups_stats=False):
+        """
+        Compute pairwise distances of a subgroup.
+        :param subgroup: The corresponding subgroup of a taxonomic rank.
+        :param max_barcodes: Maximum number of barcodes randomly sampled in the subgroup.
+        :param _subgroups_stats: If compute statistics on the fly. NOTE it makes processing slow; better skip it.
+        :return: Name and pairwise distances of the subgroup.
+        """
 
-        name, barcodes = item
+        name, barcodes = subgroup
 
         # Random sampling
         if (max_barcodes > 0) and (len(barcodes) > max_barcodes):
@@ -236,7 +243,7 @@ class BarcodePWD(object):
             final_distances = None
             for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing subgroups"):
 
-                name, spark_df = self._subgroup_dist(item, max_barcodes=max_barcodes)
+                name, spark_df = self._subgroup_dists(item, max_barcodes=max_barcodes)
 
                 # ----- If distances as spark_df
                 spark_df = spark_df.withColumn("subgroup_name", F.lit(name))

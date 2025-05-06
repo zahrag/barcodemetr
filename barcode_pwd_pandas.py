@@ -12,10 +12,6 @@ from pathlib import Path
 # Get the path of the currently running script
 current_directory = Path(__file__).parent
 
-def read_tsv(tsv_file):
-    df = pd.read_csv(tsv_file, sep='\t', low_memory=False)
-    return df
-
 class BarcodePWD(object):
 
     def _damerau_levenshtein_distance(self, aligned_sequences):
@@ -43,9 +39,15 @@ class BarcodePWD(object):
 
         return unique_distances_df[["sequence", "sequence2", "distance"]]
 
-    def _subgroup_distances(self, item, max_barcodes=1000):
+    def _subgroup_dists(self, subgroup, max_barcodes=1000):
+        """
+        Compute pairwise distances of a subgroup.
+        :param subgroup: The corresponding subgroup of a taxonomic rank.
+        :param max_barcodes: Maximum number of barcodes randomly sampled in the subgroup.
+        :return: Name and pairwise distances of the subgroup.
+        """
 
-        name, barcodes = item
+        name, barcodes = subgroup
 
         # Random sampling
         if (max_barcodes > 0) and (len(barcodes) > max_barcodes):
@@ -90,7 +92,7 @@ class BarcodePWD(object):
             final_distances = None
             for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing groups"):
 
-                group_name, df = self._subgroup_distances(item, max_barcodes=max_barcodes)
+                group_name, df = self._subgroup_dists(item, max_barcodes=max_barcodes)
 
                 df['group_name'] = group_name
                 df['distance'] = df['distance'].astype(float)
@@ -123,7 +125,7 @@ class BarcodePWD(object):
         for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc="Processing statistics"):
 
             distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.tsv')
-            df = read_tsv(distances_tsv)
+            df = pd.read_csv(distances_tsv, sep='\t', low_memory=False)
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
 
