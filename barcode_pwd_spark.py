@@ -109,7 +109,12 @@ class BarcodePWD(object):
 
         df_pd = df_spark.toPandas()
         df_pd.reset_index(inplace=True, drop=True)
-        df_pd.to_csv(path, sep='\t', index=False)
+        if path.endswith(".tsv"):
+            df_pd.to_csv(path, sep='\t', index=False)
+        elif path.endswith(".csv"):
+            df_pd.to_csv(path, index=False)
+        else:
+            raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     def _damerau_levenshtein_distance(self, aligned_sequences):
         """
@@ -315,7 +320,7 @@ class BarcodePWD(object):
             "PWD-Max": aggregated_row["mean_of_max"]
         }
 
-        pd_path = f"{current_directory}/distances/barcodes_pwd_{rank}.tsv"
+        pd_path = f"{current_directory}/distances/barcodes_pwd_{rank}.csv"
         self._save_in_pandas(df_spark, pd_path, _save=True)
 
         return rank_stats_dict
