@@ -5,8 +5,8 @@ from tqdm import tqdm
 from pathlib import Path
 from collections import defaultdict
 import pandas as pd
-from barcode_pwd_pandas import BarcodePWD as bar_PWD_panda
-from barcode_pwd_spark import BarcodePWD as bar_PWD_spark
+from barcode_pwd_pandas import BarcodePWD as bar_pwd_panda
+from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 
 # Get the path of the currently running script
@@ -20,9 +20,9 @@ class BarcodeMetric:
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species", "dna_bin"]
 
         if method == "pandas":
-            self.pwd = bar_PWD_panda()
+            self.pwd = bar_pwd_panda()
         else:
-            self.pwd = bar_PWD_spark()
+            self.pwd = bar_pwd_spark()
 
 
     def _read_metadata(self):
@@ -148,7 +148,7 @@ class BarcodeMetric:
         return d
 
     @staticmethod
-    def print_table(data_dict, title, display_table=False):
+    def print_table(data_dict, title="", display_table=False):
         if not display_table:
             return
         print("\n\n" + "+" + "-" * 143 + "+")
