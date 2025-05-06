@@ -106,7 +106,7 @@ class BarcodePWD(object):
             if not os.path.exists(distances_dir):
                 os.makedirs(distances_dir)
             final_distances.reset_index(inplace=True, drop=True)
-            final_distances.to_csv(os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.tsv'), sep='\t', index=False)
+            self._save_in_pandas(final_distances, os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.csv'))
 
     def _rank_dist_stats(self, rank):
 
@@ -124,7 +124,7 @@ class BarcodePWD(object):
         df_pandas = None
         for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc="Processing statistics"):
 
-            distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.tsv')
+            distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.csv')
             df = pd.read_csv(distances_tsv, sep='\t', low_memory=False)
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
@@ -183,9 +183,21 @@ class BarcodePWD(object):
         chk_values = [
             int(f.name.split("_chunk_")[1].split(".")[0])
             for f in dists_dir.iterdir()
-            if f.name.startswith(f"barcode_pwd_{rank}_chunk_") and f.name.endswith(".tsv")
+            if f.name.startswith(f"barcode_pwd_{rank}_chunk_") and f.name.endswith(".csv")
         ]
         return chk_values
+
+    @staticmethod
+    def _save_in_pandas(df, path, _save=False):
+        """Save distances as Pandas dataframe"""
+
+        df.reset_index(inplace=True, drop=True)
+        if path.endswith(".tsv"):
+            df.to_csv(path, sep='\t', index=False)
+        elif path.endswith(".csv"):
+            df.to_csv(path, index=False)
+        else:
+            raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
 
 
