@@ -21,9 +21,12 @@ def main(config):
     barcode_stats = barmetr.compute_full_statistics(hierarchy)
 
     # Print full statistics
-    barmetr.print_table(barcode_stats, "Full Statistics of Identical DNA Barcodes", display_table=True)
+    barmetr.print_table(barcode_stats,
+                        title="Full Statistics of Identical DNA Barcodes",
+                        display_table=True)
 
-    barmetr. save_statistics_to_tsv(barcode_stats, filename=os.path.join(os.path.dirname(metadata_file),"barcode_stats.tsv"))
+    barmetr. save_statistics_to_tsv(barcode_stats,
+                                    filename=os.path.join(os.path.dirname(config.metadata_file), "barcode_stats.tsv"))
 
 
 
