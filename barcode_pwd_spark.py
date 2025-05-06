@@ -28,21 +28,6 @@ current_directory = Path(__file__).parent
 # def damerau_levenshtein_udf(s1: pd.Series, s2: pd.Series) -> pd.Series:
 #     return s1.combine(s2, lambda x, y: textdistance.damerau_levenshtein(x, y))
 
-def make_directory(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-
-def make_tsv(df, name=None, path=None):
-    df_ = pd.DataFrame(df)
-    df_.reset_index(inplace=True, drop=True)
-    df_.to_csv(os.path.join(path, name), sep='\t', index=False)
-
-
-def read_tsv(tsv_file):
-    df = pd.read_csv(tsv_file, sep='\t', low_memory=False)
-    return df
-
 
 class BarcodePWD(object):
 
@@ -73,16 +58,22 @@ class BarcodePWD(object):
     .getOrCreate()
 
 
-    def end_spark(self):
+    def _end_spark(self):
         """ Close the Spark session when all Spark operations are done """
         self.spark.stop()
 
-    def convert_lst_rdd(self, lst):
+    def _size_info(self, df):
+        """ Get size information """
+        sizes = df.rdd.map(lambda x: len(str(x))).collect()
+        print(f"\n\nAverage size of rows: {sum(sizes) / len(sizes)}")
+        print(f"Number of rows: {len(sizes)}")
+
+    def _convert_lst_rdd(self, lst):
         """ Convert the list to an RDD """
         rdd = self.spark.sparkContext.parallelize(lst)
         return rdd
 
-    def read_df_spark(self, parquet_dir):
+    def _read_from_parquet(self, parquet_dir):
         """ Read from parquet """
         if os.path.isdir(parquet_dir):
             parquet_files = glob.glob(os.path.join(parquet_dir, "*.parquet"))
@@ -98,13 +89,7 @@ class BarcodePWD(object):
             print(f"\n\n{parquet_dir} is not a folder.")
             raise ValueError("No .parquet files found")
 
-    def get_size_info(self, df):
-        """ Get size information """
-        sizes = df.rdd.map(lambda x: len(str(x))).collect()
-        print(f"\n\nAverage size of rows: {sum(sizes) / len(sizes)}")
-        print(f"Number of rows: {len(sizes)}")
-
-    def save_as_parquet(self, df_spark, path, _save=False):
+    def _save_in_parquet(self, df_spark, path, _save=False):
         """
         Save a Spark DataFrame as a Parquet file with considerations for size and performance.
 
@@ -115,20 +100,20 @@ class BarcodePWD(object):
         if not _save:
             return
 
-        # df_spark.cache()
-
-        # Optionally repartition to optimize for saving
-        # df_spark = df_spark.repartition(100)
-
-        # df_spark.write.option("compression", "gzip").mode("overwrite").parquet(path)
-
+        if not os.path.exists(path):
+            os.makedirs(path)
         df_spark.write.mode("overwrite").parquet(path)
 
-        # df_spark.unpersist()
+    def _save_in_pandas(self, df_spark, path, _save=False):
+        """Save distances as Pandas dataframe"""
 
-    def _pwd(self, aligned_sequences):
+        df_pd = df_spark.toPandas()
+        df_pd.reset_index(inplace=True, drop=True)
+        df_pd.to_csv(path, sep='\t', index=False)
+
+    def _damerau_levenshtein_distance(self, aligned_sequences):
         """
-        This function implements Damerau-Levenshtein distance using PySpark.
+        This function implements Damerau-Levenshtein distance.
 
         Damerau-Levenshtein distance represents how many edits are needed to transform one sequence into another,
         where an edit can be an insertion, deletion, substitution, or transposition of adjacent characters (nucleotides).
@@ -143,22 +128,17 @@ class BarcodePWD(object):
         # Create a cross join to get all pairwise combinations
         cross_df = seq_df.crossJoin(seq_df.withColumnRenamed("sequence", "sequence2"))
 
-        # Using Pandas UDF for better performance, if applicable
-        # distances_df = cross_df.withColumn("distance", pandas_udf("sequence", "sequence2"))
-
         # For now, using a standard UDF as per your code
         distances_df = cross_df.withColumn("distance",
                                            F.udf(lambda s1, s2: textdistance.damerau_levenshtein(s1, s2))("sequence",
                                                                                                           "sequence2"))
-
-        # distances_df = cross_df.withColumn("distance", damerau_levenshtein_udf("sequence", "sequence2"))
 
         unique_distances_df = distances_df.filter(cross_df["sequence"] < cross_df["sequence2"])
         # unique_distances_df.select("distance").show(truncate=False)
 
         return unique_distances_df
 
-    def get_statistics(self, distances_data):
+    def _subgroup_dist_stats(self, distances_data):
         """
         In biological contexts (e.g., DNA sequences), the variance of distances (e.g., pairwise genetic distances)
         can indicate genetic diversity within a group.
@@ -196,84 +176,74 @@ class BarcodePWD(object):
             "max": results["max"],
         }
 
-    def _subgroup_distances(self, item, max_len=1000):
+    def _subgroup_dist(self, item, max_barcodes=1000, _subgroups_stats=False):
 
-        name, sequences = item
+        name, barcodes = item
 
         # Random sampling
-        sequences = random.sample(sequences, max_len) if len(sequences) > max_len else sequences
+        sequences = random.sample(barcodes, max_barcodes) if len(barcodes) > max_barcodes else barcodes
 
         # Perform alignment
         aligned_sequences = perform_mafft_alignment(sequences, name)
 
         # Compute pairwise distances
-        distances = self._pwd(aligned_sequences)
+        distances = self._damerau_levenshtein_distance(aligned_sequences)
 
         # Calculate the statistics
-        # stats = self.get_statistics(distances)
-        # stats.update({"group_name": group_name})
-        # dist_count = distances.count()
-        # stats.update({"Pairwise Distance Count": dist_count})
+        if _subgroups_stats:
+            stats = self._subgroup_dist_stats(distances)
+            stats.update({"subgroup_name": name})
+            dist_count = distances.count()
+            stats.update({"Pairwise Distance Count": dist_count})
 
         return (name, distances)
 
-    def _rank_distances(self, data_dict, rank, process=False):
-
-        if not process:
-            return
+    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, chunk_size=1000):
 
         # Convert the dictionary to a list of tuples [(species, sequences), ...]
         print(f'Processing DNA barcodes pairwise distances across {rank} ...')
 
-        min_seq_num = 3
-        tuple_list = [(group_name, data['unique_barcodes'])
-                      for group_name, data in data_dict.items()
-                      if len(data['unique_barcodes']) > min_seq_num ]
+        tuple_list = [
+            (subgroup, list(subgroup_entry['barcodes'].keys()))
+            for subgroup, subgroup_entry in rank_hierarchy.items()
+            if len(subgroup_entry['barcodes']) > min_barcodes
+        ]
 
-        chunk_size = 1000
-        tuple_list_chunks = [tuple_list[i:i + chunk_size] for i in range(0, len(tuple_list), chunk_size)]
+        tuple_chunks = [tuple_list[i:i + chunk_size]
+                             for i in range(0, len(tuple_list), chunk_size)
+                             ]
 
         chk_ended = 0
-        max_seq_length = 1000
-        for chk in range(len(tuple_list_chunks)):
+        max_barcodes = 1000
+        for chk in range(len(tuple_chunks)):
 
             if chk < chk_ended:
                 continue
 
-            chunk = tuple_list_chunks[chk]
+            chunk = tuple_chunks[chk]
 
             final_distances = None
-            # stats_lst = []
-            # distances_dict = {}
-            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing groups"):
+            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing subgroups"):
 
-                group_name, spark_df = self._subgroup_distances(item, max_len=max_seq_length)
-
-                # ------ If statistics
-                # stats_lst.append(stats)
-
-                # ------ If distances as list
-                # distances_dict[group_name] = spark_df.select("distance").rdd.flatMap(lambda x: x).collect()
-                # distances_dict[group_name] = spark_df.select("distance").toPandas()["distance"].tolist()
+                name, spark_df = self._subgroup_dist(item, max_barcodes=max_barcodes)
 
                 # ----- If distances as spark_df
-                spark_df = spark_df.withColumn("group_name", F.lit(group_name))
-                distances = spark_df.select("distance", "group_name")
+                spark_df = spark_df.withColumn("subgroup_name", F.lit(name))
+                distances = spark_df.select("distance", "subgroup_name")
                 distances = distances.withColumn("distance", col("distance").cast("float"))
                 final_distances = distances if final_distances is None else final_distances.union(distances)
 
-            # ---- Save the DataFrame to Parquet format
+            # ---- Save the DataFrame to Parquet
             distances_dir = f"{current_directory}/distances/{rank}/chunk_{chk}"
-            make_directory(distances_dir)
-            # create_pickle(distances_dict, distances_dir)
-            self.save_as_parquet(final_distances, distances_dir, _save=True)
+            self._save_in_parquet(final_distances, distances_dir, _save=True)
             print('')
 
+    def _rank_dist_stats(self, rank, max_chk=10):
 
-    def _rank_statistics(self, rank, max_chk=10, process=False):
-
-        if not process:
-            return None
+        rank_distances_dir = f"{current_directory}/distances/{rank}"
+        if not os.path.exists(rank_distances_dir):
+            print(f"The directory does NOT contain distances files of {rank}")
+            return
 
         print(f'Processing DNA barcodes statistics across {rank} ...')
 
@@ -281,15 +251,15 @@ class BarcodePWD(object):
         df_spark = None
         for chk in tqdm(range(max_chk), total=max_chk, desc="Processing statistics"):
 
-            distances_dir = f"{current_directory}/distances/{rank}/chunk_{chk}"
+            distances_dir = os.path.join(rank_distances_dir, f"chunk_{chk}")
             if not os.path.exists(distances_dir):
                 continue
 
-            df = self.read_df_spark(distances_dir)
+            df = self._read_from_parquet(distances_dir)
             df_spark = df if df_spark is None else df_spark.union(df)
 
             # Group by 'group_name' and calculate statistics for each group of the chunk
-            stats_df = df.groupBy("group_name").agg(
+            stats_df = df.groupBy("subgroup_name").agg(
                 F.mean("distance").alias("mean"),
                 F.variance("distance").alias("variance"),
                 F.stddev("distance").alias("stddev"),
@@ -297,9 +267,6 @@ class BarcodePWD(object):
                 F.max("distance").alias("max")
             )
             rank_stats = stats_df if rank_stats is None else rank_stats.union(stats_df)
-
-        df_pandas = df_spark.toPandas()
-        make_tsv(df_pandas, name=f'BIOSCAN_5M_distances_{rank}.tsv', path=os.path.join(current_directory, 'distances'))
 
         # Now aggregate the statistics (mean aggregation function) across the entire rank_stats DataFrame
         aggregated_rank_stat = rank_stats.agg(
@@ -318,12 +285,15 @@ class BarcodePWD(object):
 
         # Convert the row to a dictionary
         rank_stats_dict = {
-            "Mean": aggregated_row["mean_of_means"],
-            "Variance": aggregated_row["mean_of_variance"],
-            "Std.Dev": aggregated_row["mean_of_stddev"],
-            "Min": aggregated_row["mean_of_min"],
-            "Max": aggregated_row["mean_of_max"]
+            "PWD-Mean": aggregated_row["mean_of_means"],
+            "PWD-Variance": aggregated_row["mean_of_variance"],
+            "PWD-Std.Dev": aggregated_row["mean_of_stddev"],
+            "PWD-Min": aggregated_row["mean_of_min"],
+            "PWD-Max": aggregated_row["mean_of_max"]
         }
+
+        pd_path = f"{current_directory}/distances/barcodes_pwd_{rank}.tsv"
+        self._save_in_pandas(df_spark, pd_path, _save=True)
 
         return rank_stats_dict
 

@@ -131,7 +131,7 @@ class BarcodePWD(object):
         for chk in tqdm(range(max_chk), total=max_chk, desc="Processing statistics"):
 
             distances_dir = os.path.join(current_directory, 'distances', rank)
-            distances_tsv = os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.tsv')
+            distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.tsv')
             if not os.path.exists(distances_dir):
                 continue
 
