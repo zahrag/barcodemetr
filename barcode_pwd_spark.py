@@ -9,7 +9,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import col
 import textdistance
 
-from barcode_alignment import perform_mafft_alignment
+from barcode_alignment import BarcodeAlignment
 
 
 # @pandas_udf(FloatType())
@@ -19,7 +19,9 @@ from barcode_alignment import perform_mafft_alignment
 
 class BarcodePWD(object):
 
-    def __init__(self):
+    def __init__(self, save_path=None):
+
+        self.save_path = save_path
 
         # try
         self.spark = self.initialize_spark()
@@ -28,6 +30,9 @@ class BarcodePWD(object):
 
         # Set the number of partitions to 2-4 times the number of cores
         self.num_partitions = max(2, min(4 * self.num_cores, 100))  # Limit to a reasonable max, e.g., 100
+
+        # Initialize Barcode Alignment
+        self.mafft_align = BarcodeAlignment(save_path=save_path)
 
     def initialize_spark(self):
         return SparkSession.builder \
@@ -187,7 +192,7 @@ class BarcodePWD(object):
             sequences = barcodes
 
         # Perform alignment
-        aligned_sequences = perform_mafft_alignment(sequences, name)
+        aligned_sequences = self.mafft_align.perform_mafft_alignment(sequences, name)
 
         # Compute pairwise distances
         distances = self._damerau_levenshtein_distance(aligned_sequences)
@@ -245,6 +250,7 @@ class BarcodePWD(object):
                 final_distances = distances if final_distances is None else final_distances.union(distances)
 
             # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
+            path = path if path is not None else self.save_path
             distances_dir = f"{path}/distances/{rank}/chunk_{chk}"
             if not os.path.exists(distances_dir):
                 os.makedirs(distances_dir)
