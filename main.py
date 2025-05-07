@@ -6,11 +6,14 @@ from utils import *
 
 def main(configs):
 
-    barmetr = BarcodeMetric(metadata_file= configs.metadata_file,
-                            method=configs.method, load_metadata=configs.load_metadata)
+    barmetr = BarcodeMetric(method=configs.method,
+                            metadata_file= configs.metadata_file,
+                            load_metadata=configs.load_metadata,
+                            save_path=configs.save_path,
+                            )
 
     # Create ranked data hierarchy from metadata
-    ranked_data = barmetr.build_hierarchy(path=configs.ranked_data_path)
+    ranked_data = barmetr.build_hierarchy(path=configs.ranked_data_file)
 
     # Compute Shannon Diversity Index (SDI) inplace
     ranked_data = barmetr.compute_sdi(ranked_data, enabled=configs.compute_sdi)
@@ -22,7 +25,9 @@ def main(configs):
     barmetr.compute_pwd(ranked_data=None)
 
     # Compute the full statistics of the identical DNA barcodes
-    barcode_stats_full = barmetr.compute_full_statistics(ranked_data, save_distances_pandas=configs.save_distances_pandas)
+    barcode_stats_full = barmetr.compute_full_statistics(ranked_data=ranked_data,
+                                                         save_distances_pandas=configs.save_distances_pandas
+                                                         )
 
     # Print full statistics
     print_table(barcode_stats_full, title="Full Statistics of Identical DNA Barcodes", display_table=configs.display_table
@@ -50,10 +55,15 @@ if __name__ == "__main__":
                         default="spark",
                         help="Method to use for processing (pandas or spark)")
 
-    parser.add_argument("--ranked_data_path",
+    parser.add_argument("--ranked_data_file",
                         type=str,
                         default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/data_hierarchy.pkl",
                         help="Path to the ranked data pickle file",)
+
+    parser.add_argument("--save_path",
+                        type=str,
+                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/",
+                        help="Path to save the results", )
 
     parser.add_argument('--load_metadata',
                         default=False,
@@ -81,10 +91,10 @@ if __name__ == "__main__":
                         action='store_true',
                         help='IF saving the full DNA barcode statistics?')
 
-    parser.add_argument('--compute_full_statistics',
+    parser.add_argument('--save_distances_pandas',
                         default=False,
                         action='store_true',
-                        help='IF saving the pairwise distance of each rank in panda? (NOTE that it is time consuming.)')
+                        help='IF saving the pairwise distance of each rank in pandas? (NOTE that it is time consuming.)')
 
     # Parse the arguments
     args = parser.parse_args()
