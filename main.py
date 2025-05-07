@@ -9,24 +9,26 @@ def main(config):
     barmetr = BarcodeMetric(metadata_file=config.metadata_file, method=config.method)
 
     # Create data hierarchy from metadata
-    hierarchy = barmetr.build_hierarchy()
+    data_hierarchy = barmetr.build_hierarchy()
 
     # Compute Shannon Diversity Index (SDI) inplace
-    hierarchy = barmetr.compute_sdi(hierarchy)
+    data_hierarchy = barmetr.compute_sdi(data_hierarchy)
+
+    # Save in pickle to prevent re-computation
+    barmetr.create_pickle(data_hierarchy, os.path.join(barmetr.save_path, "data_hierarchy.pkl"))
 
     # Compute and save in parquets identical DNA pairwise distances
-    barmetr.compute_pwd(hierarchy)
+    barmetr.compute_pwd(data_hierarchy)
 
     # Compute the full statistics of the identical DNA barcodes
-    barcode_stats = barmetr.compute_full_statistics(hierarchy)
+    barcode_stats = barmetr.compute_full_statistics(data_hierarchy)
 
     # Print full statistics
     barmetr.print_table(barcode_stats,
                         title="Full Statistics of Identical DNA Barcodes",
                         display_table=True)
 
-    barmetr. save_statistics_to_tsv(barcode_stats,
-                                    filename=os.path.join(os.path.dirname(config.metadata_file), "barcode_stats.tsv"))
+    barmetr.save_in_pandas(barcode_stats, os.path.join(barmetr.save_path, "barcode_stats.csv"))
 
 
 
