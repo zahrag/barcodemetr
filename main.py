@@ -12,7 +12,7 @@ def main(config):
     data_hierarchy = barmetr.build_hierarchy()
 
     # Compute Shannon Diversity Index (SDI) inplace
-    data_hierarchy = barmetr.compute_sdi(data_hierarchy)
+    data_hierarchy = barmetr.compute_sdi(data_hierarchy, enabled=True)
 
     # Save in pickle to prevent re-computation
     barmetr.create_pickle(data_hierarchy, os.path.join(barmetr.save_path, "data_hierarchy.pkl"))
