@@ -13,16 +13,20 @@ def main(configs):
                             )
 
     # Create ranked data hierarchy from metadata
-    ranked_data = barmetr.build_hierarchy(path=configs.ranked_data_file)
+    ranked_data = barmetr.build_hierarchy()
 
     # Compute Shannon Diversity Index (SDI) inplace
-    ranked_data = barmetr.compute_sdi(ranked_data, enabled=configs.compute_sdi)
+    ranked_data = barmetr.compute_sdi(ranked_data,
+                                      enabled=configs.compute_sdi,
+                                      )
 
     # Save in pickle to prevent re-computation
-    create_pickle(data=None, pickle_file="")
+    create_pickle(data=ranked_data,
+                  pickle_file=configs.ranked_data_file,
+                  )
 
     # Compute and save in parquets identical DNA pairwise distances
-    barmetr.compute_pwd(ranked_data=None)
+    barmetr.compute_pwd(ranked_data=ranked_data)
 
     # Compute the full statistics of the identical DNA barcodes
     barcode_stats_full = barmetr.compute_full_statistics(ranked_data=ranked_data,
@@ -30,8 +34,10 @@ def main(configs):
                                                          )
 
     # Print full statistics
-    print_table(barcode_stats_full, title="Full Statistics of Identical DNA Barcodes", display_table=configs.display_table
-                        )
+    print_table(barcode_stats_full,
+                title="Full Statistics of Identical DNA Barcodes",
+                display_table=configs.display_table,
+                )
 
     save_in_pandas(barcode_stats_full,
                    os.path.join(barmetr.save_path, "barcode_stats.csv"),
@@ -47,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument("--metadata_file",
                         type=str,
                         help="Path to the metadata CSV file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/BIOSCAN_5M_Insect_Dataset_metadata.csv")
+                        default="")
 
     parser.add_argument("--method",
                         type=str,
@@ -57,12 +63,12 @@ if __name__ == "__main__":
 
     parser.add_argument("--ranked_data_file",
                         type=str,
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/data_hierarchy.pkl",
+                        default="",
                         help="Path to the ranked data pickle file",)
 
     parser.add_argument("--save_path",
                         type=str,
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/",
+                        default="",
                         help="Path to save the results", )
 
     parser.add_argument('--load_metadata',
