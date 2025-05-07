@@ -1,18 +1,23 @@
 
 import os
+from pathlib import Path
 
 from tqdm import tqdm
 import random
 import textdistance
 
 import pandas as pd
-from barcode_alignment import perform_mafft_alignment
-from pathlib import Path
+from barcode_alignment import BarcodeAlignment
 
-# Get the path of the currently running script
-current_directory = Path(__file__).parent
 
 class BarcodePWD(object):
+
+    def __init__(self, save_path):
+
+        self.save_path = save_path
+
+        # Initialize Barcode Alignment
+        self.mafft_align = BarcodeAlignment(save_path=save_path)
 
     def _damerau_levenshtein_distance(self, aligned_sequences):
         """
@@ -56,14 +61,14 @@ class BarcodePWD(object):
             sequences = barcodes
 
         # Perform alignment
-        aligned_sequences = perform_mafft_alignment(sequences, name)
+        aligned_sequences = self.mafft_align.perform_mafft_alignment(sequences, name)
 
         # Compute pairwise distances
         distances = self._damerau_levenshtein_distance(aligned_sequences)
 
         return (name, distances)
 
-    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000):
+    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
         This function process distance computation per taxonomic rank using pandas.
         :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
@@ -102,21 +107,20 @@ class BarcodePWD(object):
                     else pd.concat([final_distances, df[['distance', 'group_name']]], ignore_index=True)
 
             # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
-            distances_dir = os.path.join(current_directory, 'distances', rank)
+            path = path if path is not None else self.save_path
+            distances_dir = f"{path}/distances/{rank}/chunk_{chk}"
             if not os.path.exists(distances_dir):
                 os.makedirs(distances_dir)
-            final_distances.reset_index(inplace=True, drop=True)
             self._save_in_pandas(final_distances, os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.csv'))
 
-    def _rank_dist_stats(self, rank):
+    def _rank_dist_stats(self, rank, distances_root=None):
 
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         """
 
-        distances_dir = os.path.join(current_directory, 'distances', rank)
-        chks = self.extract_chunks(rank, distances_dir)
+        chks = self.extract_chunks(rank, distances_root)
 
         print(f'Processing DNA barcodes statistics across {rank} ...')
 
@@ -124,8 +128,8 @@ class BarcodePWD(object):
         df_pandas = None
         for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc="Processing statistics"):
 
-            distances_tsv = os.path.join(distances_dir, f'barcodes_pwd_{rank}_chunk_{chk}.csv')
-            df = pd.read_csv(distances_tsv, sep='\t', low_memory=False)
+            dist_file = f'{distances_root}/barcodes_pwd_{rank}_chunk_{chk}.csv'
+            df = pd.read_csv(dist_file, low_memory=False)
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
 
