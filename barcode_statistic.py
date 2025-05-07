@@ -129,16 +129,23 @@ class BarcodeMetric:
         """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
-            self.pwd._rank_dist(data_hierarchy[rank], rank)
+            self.pwd._rank_dist(data_hierarchy[rank], rank, path=self.save_path)
 
-    def compute_pwd_statistics(self, data_hierarchy, ranks=None):
-        if ranks is None:
-            ranks = list(data_hierarchy.keys())
+    def compute_pwd_statistics(self, data_hierarchy, taxonomy_ranks=None):
+
+        taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
 
         pwd_stats = {}
-        for rank in ranks:
+        for rank in taxonomy_ranks:
             if rank in data_hierarchy:
-                pwd_stats[rank] = self.pwd._rank_dist_stats(data_hierarchy[rank], rank)
+                distances_root = f"{self.save_path}/distances/{rank}"
+                if not os.path.exists(distances_root):
+                    raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n "
+                                     f"Compute pairwise distances across {rank} first."
+                                     )
+                pwd_stats[rank] = self.pwd._rank_dist_stats(data_hierarchy[rank],
+                                                            rank,
+                                                            distances_root=distances_root)
 
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
