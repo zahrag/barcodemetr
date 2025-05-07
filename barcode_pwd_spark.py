@@ -216,9 +216,6 @@ class BarcodePWD(object):
           :param chunk_size: Chunk size of the subgroups of the rank.
           """
 
-        # Convert the dictionary to a list of tuples [(species, sequences), ...]
-        print(f'\nProcessing DNA barcodes pairwise distances across {rank} ...\n')
-
         tuple_list = [
             (subgroup, list(subgroup_entry['barcodes'].keys()))
             for subgroup, subgroup_entry in rank_hierarchy.items()
@@ -239,7 +236,7 @@ class BarcodePWD(object):
             chunk = tuple_chunks[chk]
 
             final_distances = None
-            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing subgroups"):
+            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc=f"Processing subgroups of {rank}"):
 
                 name, spark_df = self._subgroup_dists(item, max_barcodes=max_barcodes)
 
@@ -255,7 +252,7 @@ class BarcodePWD(object):
             if not os.path.exists(distances_path):
                 os.makedirs(distances_path)
             self._save_in_parquet(final_distances, distances_path, _save=True)
-            print(f'{rank} pairwise distances saved to {distances_path}.')
+            print(f'\n\n{rank} pairwise distances saved to {distances_path}.')
 
     def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None):
         """
@@ -311,7 +308,7 @@ class BarcodePWD(object):
             "PWD-Max": aggregated_row["mean_of_max"]
         }
 
-        pd_path = f"{current_directory}/distances/barcodes_pwd_{rank}.csv"
+        pd_path = f"{self.save_path}/distances/barcodes_pwd_{rank}.csv"
         self._save_in_pandas(df_spark, pd_path, _save=True)
 
         return rank_stats_dict
