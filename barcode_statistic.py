@@ -13,10 +13,10 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 class BarcodeMetric:
 
-    def __init__(self, metadata_file="", method="pandas", read_metadata=False):
+    def __init__(self, metadata_file="", method="pandas"):
 
         self.metadata = metadata_file
-        self.df = self._read_metadata(metadata_file, read_metadata=False)
+        self.df = self.load_metadata(metadata_file)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         # Save all files in a pre-defined directory
@@ -30,8 +30,8 @@ class BarcodeMetric:
             self.pwd = bar_pwd_spark(save_path=self.save_path)
 
 
-    def _read_metadata(self, file, read_metadata=False):
-        if not read_metadata:
+    def load_metadata(self, file):
+        if not file:
             return None
         if file.endswith(".tsv"):
             return pd.read_csv(file, sep='\t', low_memory=False)
@@ -40,7 +40,7 @@ class BarcodeMetric:
         else:
             raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
-    def _sdi(self, sample_counts):
+    def sdi(self, sample_counts):
         proportions = np.array(sample_counts) / sum(sample_counts)
         sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
         return sdi
@@ -59,12 +59,12 @@ class BarcodeMetric:
         """
 
         if path is not None and os.path.isfile(path):
-            return self.open_pickle(path, enabled=True)
+            return self.open_pickle(pickle_file=path)
 
         df = df if df is not None else self.df
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
 
-        data_hierarchy = defaultdict(lambda: defaultdict(lambda: {'barcodes': {}, 'sdi': 0.0}))
+        ranked_data = defaultdict(lambda: defaultdict(lambda: {'barcodes': {}, 'sdi': 0.0}))
         for _, row in tqdm(df.iterrows(), total=len(df), desc="Building hierarchy"):
             barcode = row['dna_barcode']
             sample = row['processid']
@@ -72,14 +72,14 @@ class BarcodeMetric:
             for rank in taxonomy_ranks:
                 subgroup = row[rank]
                 if pd.notna(subgroup):
-                    subgroup_entry = data_hierarchy[rank][subgroup]
+                    subgroup_entry = ranked_data[rank][subgroup]
                     if barcode not in subgroup_entry['barcodes']:
                         subgroup_entry['barcodes'][barcode] = {'samples': []}
                     subgroup_entry['barcodes'][barcode]['samples'].append(sample)
 
-        return data_hierarchy
+        return ranked_data
 
-    def compute_sdi(self, data_hierarchy, enabled=False):
+    def compute_sdi(self, ranked_data, enabled=False):
         """
         Computes Shannon Diversity Index (SDI) for each (rank, subgroup) in the hierarchy.
         Updates the hierarchy in-place by storing 'sdi' per subgroup.
@@ -87,27 +87,27 @@ class BarcodeMetric:
         """
 
         if not enabled:
-            return data_hierarchy
+            return ranked_data
 
-        for rank in data_hierarchy:
-            for subgroup, subgroup_entry in tqdm(data_hierarchy[rank].items(), total=len(data_hierarchy[rank]), desc=f"Computing SDI of {rank}"):
+        for rank in ranked_data:
+            for subgroup, subgroup_entry in tqdm(ranked_data[rank].items(), total=len(ranked_data[rank]), desc=f"Computing SDI of {rank}"):
                 sample_counts = [
                     len(barcode_info['samples'])
                     for barcode_info in subgroup_entry['barcodes'].values()
                 ]
-                subgroup_entry['sdi'] = self._sdi(sample_counts)
+                subgroup_entry['sdi'] = self.sdi(sample_counts)
 
-        return self.convert_to_regular_dict(data_hierarchy)
+        return self.convert_to_regular_dict(ranked_data)
 
-    def compute_barcodes_statistics(self, data_hierarchy):
+    def compute_barcodes_statistics(self, ranked_data):
 
         barcode_stats = {}
-        for rank in data_hierarchy:
+        for rank in ranked_data:
 
             dna_unique_group_lst = []
             sdi_lst = []
-            for subgroup, subgroup_entry in tqdm(data_hierarchy[rank].items(),
-                                                 total=len(data_hierarchy[rank]),
+            for subgroup, subgroup_entry in tqdm(ranked_data[rank].items(),
+                                                 total=len(ranked_data[rank]),
                                                  desc=f"Barcode statistics of {rank}"):
 
                 num_barcodes = len(subgroup_entry['barcodes'])
@@ -127,39 +127,44 @@ class BarcodeMetric:
         print(f"Identical DNA Barcode Statistics: {barcode_stats}")
         return barcode_stats
 
-    def compute_pwd(self, data_hierarchy, taxonomy_ranks=None):
+    def compute_pwd(self, ranked_data=None, taxonomy_ranks=None):
         """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
+        if not ranked_data:
+            return
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
-            self.pwd._rank_dist(data_hierarchy[rank], rank, path=self.save_path)
+            self.pwd._rank_dists(ranked_data[rank], rank, path=self.save_path)
 
-    def compute_pwd_statistics(self, data_hierarchy, taxonomy_ranks=None):
+    def compute_pwd_statistics(self, ranked_data, taxonomy_ranks=None):
 
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
 
         pwd_stats = {}
         for rank in taxonomy_ranks:
-            if rank in data_hierarchy:
+            if rank in ranked_data:
                 distances_root = f"{self.save_path}/distances/{rank}"
                 if not os.path.exists(distances_root):
                     raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n "
                                      f"Compute pairwise distances across {rank} first."
                                      )
-                pwd_stats[rank] = self.pwd._rank_dist_stats(data_hierarchy[rank],
+                pwd_stats[rank] = self.pwd._rank_dist_stats(ranked_data[rank],
                                                             rank,
                                                             distances_root=distances_root)
 
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
-    def compute_full_statistics(self, data_hierarchy):
+    def compute_full_statistics(self, ranked_data=None):
 
-        barcode_stats = self.compute_barcodes_statistics(data_hierarchy)
+        if not ranked_data:
+            return
 
-        pwd_stats = self.compute_pwd_statistics(data_hierarchy)
+        barcode_stats = self.compute_barcodes_statistics(ranked_data)
+
+        pwd_stats = self.compute_pwd_statistics(ranked_data)
 
         s_dict = defaultdict(list)
-        ranks = list(data_hierarchy.keys())
+        ranks = list(ranked_data.keys())
 
         for rank in ranks:
 
@@ -199,9 +204,9 @@ class BarcodeMetric:
         print(tabulate(formatted_rows, headers=headings, tablefmt="grid"))
 
     @staticmethod
-    def save_in_pandas(df, panda_file, enabled=False):
+    def save_in_pandas(df, panda_file, save_statistics=False):
         """Save distances as Pandas dataframe"""
-        if not enabled:
+        if not save_statistics:
             return
         df.reset_index(inplace=True, drop=True)
         if panda_file.endswith(".tsv"):
@@ -212,15 +217,15 @@ class BarcodeMetric:
             raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     @staticmethod
-    def create_pickle(data, pickle_file, enabled=False):
-        if not enabled:
+    def create_pickle(data=None, pickle_file=""):
+        if not data:
             return
         with open(pickle_file, 'wb') as f:
             pickle.dump(data, f)
 
     @staticmethod
-    def open_pickle(pickle_file, enabled=False):
-        if not enabled:
+    def open_pickle(pickle_file=""):
+        if not pickle_file:
             return
         objects = []
         with (open(pickle_file, "rb")) as openfile:
