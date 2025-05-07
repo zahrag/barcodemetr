@@ -66,7 +66,7 @@ class BarcodePWD(object):
         rdd = self.spark.sparkContext.parallelize(lst)
         return rdd
 
-    def _read_from_parquet(self, parquet_dir):
+    def _load_from_parquet(self, parquet_dir):
         """ Read from parquet """
         if os.path.isdir(parquet_dir):
             parquet_files = glob.glob(os.path.join(parquet_dir, "*.parquet"))
@@ -206,7 +206,7 @@ class BarcodePWD(object):
 
         return (name, distances)
 
-    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
+    def _rank_dists(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
           This function process distance computation per taxonomic rank using pandas.
           :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
@@ -252,7 +252,7 @@ class BarcodePWD(object):
             if not os.path.exists(distances_path):
                 os.makedirs(distances_path)
             self._save_in_parquet(final_distances, distances_path, _save=True)
-            print(f'\n\n{rank} pairwise distances saved to {distances_path}.')
+            print(f'\n{rank} pairwise distances saved to {distances_path}.\n')
 
     def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None):
         """
@@ -271,7 +271,7 @@ class BarcodePWD(object):
             if not os.path.exists(distances_dir):
                 continue
 
-            df = self._read_from_parquet(distances_dir)
+            df = self._load_from_parquet(distances_dir)
             df_spark = df if df_spark is None else df_spark.union(df)
 
             # Group by 'group_name' and calculate statistics for each group of the chunk
