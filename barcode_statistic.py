@@ -37,7 +37,7 @@ class BarcodeMetric:
         Build the barcode hierarchy, or load from a pickled file if path is provided.
 
         Args:
-            df (pd.DataFrame, optional): DataFrame to use instead of reading from metadata.
+            df (pd.DataFrame, optional): DataFrame to use instead of reading from file.
             taxonomy_ranks (list, optional): Taxonomic ranks to process.
             path (str, optional): Path to a pickled hierarchy file to load.
 
@@ -173,7 +173,7 @@ class BarcodeMetric:
             for key, value in merged_stats.items():
                 s_dict[key].append(round(value, 4))
 
-            print(f'Full Statistics of {rank} processed and collected.')
+            print(f'Full Statistics of {rank} Processed and Collected.')
 
         return s_dict
 
