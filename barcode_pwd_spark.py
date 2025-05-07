@@ -246,7 +246,7 @@ class BarcodePWD(object):
         """
 
         chks = extract_chunks(rank, distances_root, method="spark")
-        print(f"Save chunks: {chks}.")
+        print(f"\nSaved chunks: {chks}.\n")
 
         rank_stats = None
         df_spark = None
@@ -295,8 +295,7 @@ class BarcodePWD(object):
 
         # Additionally save distances in Pandas dataframe
         path_pd = f"{self.save_path}/distances/barcodes_pwd_{rank}.csv"
-        df_pd = df_spark.toPandas()
-        save_in_pandas(df_pd, path_pd, _save=save_distances_pandas)
+        save_in_pandas(df_spark, path_pd, _save=save_distances_pandas)
 
         return rank_stats_dict
 
