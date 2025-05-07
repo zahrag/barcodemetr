@@ -249,13 +249,13 @@ class BarcodePWD(object):
                 distances = distances.withColumn("distance", col("distance").cast("float"))
                 final_distances = distances if final_distances is None else final_distances.union(distances)
 
-            # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
+            # ---- Save the spark dataframe of pairwise distance for the subgroups existed in the chunk chk
             path = path if path is not None else self.save_path
-            distances_dir = f"{path}/distances/{rank}/chunk_{chk}"
-            if not os.path.exists(distances_dir):
-                os.makedirs(distances_dir)
-            self._save_in_parquet(final_distances, distances_dir, _save=True)
-            print('')
+            distances_path = f"{path}/distances/{rank}/chunk_{chk}"
+            if not os.path.exists(distances_path):
+                os.makedirs(distances_path)
+            self._save_in_parquet(final_distances, distances_path, _save=True)
+            print(f'{rank} pairwise distances saved to {distances_path}.')
 
     def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None):
         """
