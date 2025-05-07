@@ -79,9 +79,6 @@ class BarcodePWD(object):
         :param chunk_size: Chunk size of the subgroups of the rank.
         """
 
-        # Convert the dictionary to a list of tuples [(species, sequences), ...]
-        print(f'Processing DNA barcodes pairwise distances across {rank} ...')
-
         tuple_list = [
             (subgroup, list(subgroup_entry['barcodes'].keys()))
             for subgroup, subgroup_entry in rank_hierarchy.items()
@@ -96,7 +93,7 @@ class BarcodePWD(object):
         for chk, chunk in enumerate(tuple_chunks):
 
             final_distances = None
-            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc="Processing groups"):
+            for cnt, item in tqdm(enumerate(chunk), total=len(chunk), desc=f"Processing groups of {rank}"):
 
                 group_name, df = self._subgroup_dists(item, max_barcodes=max_barcodes)
 
@@ -124,13 +121,12 @@ class BarcodePWD(object):
         :param rank: Taxonomic group level (e.g., family, genus, species).
         """
 
-        chks = extract_chunks(rank, distances_root)
-
-        print(f'Processing DNA barcodes statistics across {rank} ...')
+        chks = extract_chunks(rank, distances_root, method="pandas")
+        print(f"Save chunks: {chks}.")
 
         rank_stats = None
         df_pandas = None
-        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc="Processing statistics"):
+        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc=f"Processing statistics of {rank}"):
 
             dist_file = f'{distances_root}/barcodes_pwd_{rank}_chunk_{chk}.csv'
             df = pd.read_csv(dist_file, low_memory=False)
