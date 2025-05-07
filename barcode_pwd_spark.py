@@ -10,11 +10,7 @@ from pyspark.sql.functions import col
 import textdistance
 
 from barcode_alignment import BarcodeAlignment
-
-
-# @pandas_udf(FloatType())
-# def damerau_levenshtein_udf(s1: pd.Series, s2: pd.Series) -> pd.Series:
-#     return s1.combine(s2, lambda x, y: textdistance.damerau_levenshtein(x, y))
+from barcodemetr.utils import save_in_pandas
 
 
 class BarcodePWD(object):
@@ -96,18 +92,6 @@ class BarcodePWD(object):
         if not os.path.exists(path):
             os.makedirs(path)
         df_spark.write.mode("overwrite").parquet(path)
-
-    def _save_in_pandas(self, df_spark, path, _save=False):
-        """Save distances as Pandas dataframe"""
-
-        df_pd = df_spark.toPandas()
-        df_pd.reset_index(inplace=True, drop=True)
-        if path.endswith(".tsv"):
-            df_pd.to_csv(path, sep='\t', index=False)
-        elif path.endswith(".csv"):
-            df_pd.to_csv(path, index=False)
-        else:
-            raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     def _damerau_levenshtein_distance(self, aligned_sequences):
         """
@@ -254,18 +238,16 @@ class BarcodePWD(object):
             self._save_in_parquet(final_distances, distances_path, _save=True)
             print(f'\n{rank} pairwise distances saved to {distances_path}.\n')
 
-    def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None):
+    def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None, save_distances_pandas=False):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param max_chunk: Maximum number of chunks of the subgroups of the rank.
         """
 
-        print(f'Processing DNA barcodes statistics across {rank} ...')
-
         rank_stats = None
         df_spark = None
-        for chk in tqdm(range(max_chunk), total=max_chunk, desc="Processing statistics"):
+        for chk in tqdm(range(max_chunk), total=max_chunk, desc=f"Computing statistics of {rank}"):
 
             distances_dir = os.path.join(distances_root, f"chunk_{chk}")
             if not os.path.exists(distances_dir):
@@ -308,8 +290,10 @@ class BarcodePWD(object):
             "PWD-Max": aggregated_row["mean_of_max"]
         }
 
-        pd_path = f"{self.save_path}/distances/barcodes_pwd_{rank}.csv"
-        self._save_in_pandas(df_spark, pd_path, _save=True)
+        # Additionally save distances in Pandas dataframe
+        path_pd = f"{self.save_path}/distances/barcodes_pwd_{rank}.csv"
+        df_pd = df_spark.toPandas()
+        save_in_pandas(df_pd, path_pd, _save=save_distances_pandas)
 
         return rank_stats_dict
 
