@@ -35,7 +35,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute DNA Barcode Statistics")
 
     parser.add_argument("--metadata_file", type=str, help="Path to the metadata CSV file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/cvs/BIOSCAN_5M_Insect_Dataset_metadata.csv")
+                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/BIOSCAN_5M_Insect_Dataset_metadata.csv")
     parser.add_argument("--method", type=str, choices=["pandas", "spark"], default="spark",
                         help="Method to use for processing (pandas or spark)")
 
