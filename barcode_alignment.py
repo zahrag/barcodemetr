@@ -4,10 +4,6 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from io import StringIO
 import os
-from pathlib import Path
-
-# Get the path of the currently running script
-current_directory = Path(__file__).parent
 
 
 class BarcodeAlignment:
@@ -16,7 +12,7 @@ class BarcodeAlignment:
 
     def mafft_align(self, sequences):
         """
-        This function performs MAFFT alignment of a chunk of sequences without saving to disk.
+        This function performs MAFFT alignment of a chunk of sequences without saving fasta files to disk.
         :param sequences: Chunk of sequences.
         :param taxa: Taxonomic rank.
         :param max_length: Maximum length of sequences.
@@ -55,7 +51,7 @@ class BarcodeAlignment:
 
     def mafft_align_and_save(self, sequences, taxa, remove_fasta=False):
         """
-        This function performs MAFFT alignment of a chunk of DNA barcode sequences.
+        This function performs MAFFT alignment of a chunk of DNA barcode sequences saving fasta files on disk.
         :param sequences: A chunk of sequences.
         :param taxa: Taxonomic rank.
         :return: Aligned sequences.
