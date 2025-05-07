@@ -2,13 +2,11 @@
 import os
 import numpy as np
 from tqdm import tqdm
-import pandas as pd
-from collections import defaultdict
 
+from utils import *
 from barcode_pwd_pandas import BarcodePWD as bar_pwd_panda
 from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
-from utils import *
 
 
 class BarcodeMetric:
@@ -16,7 +14,7 @@ class BarcodeMetric:
     def __init__(self, metadata_file="", method="pandas", load_metadata=False):
 
         self.metadata = metadata_file
-        self.df = self.load_metadata(metadata_file, load_metadata)
+        self.df = load_from_pandas(metadata_file, load_file=load_metadata)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         # Save all files in a pre-defined directory
@@ -28,17 +26,6 @@ class BarcodeMetric:
             self.pwd = bar_pwd_panda(save_path=self.save_path)
         else:
             self.pwd = bar_pwd_spark(save_path=self.save_path)
-
-
-    def load_metadata(self, file, load_metadata):
-        if not load_metadata:
-            return None
-        if file.endswith(".tsv"):
-            return pd.read_csv(file, sep='\t', low_memory=False)
-        elif file.endswith(".csv"):
-            return pd.read_csv(file, low_memory=False)
-        else:
-            raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     def sdi(self, sample_counts):
         proportions = np.array(sample_counts) / sum(sample_counts)
