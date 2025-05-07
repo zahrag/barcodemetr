@@ -6,10 +6,10 @@ from barcode_statistic import BarcodeMetric
 
 def main(config):
 
-    barmetr = BarcodeMetric(metadata_file=config.metadata_file, method=config.method)
+    barmetr = BarcodeMetric(metadata_file=config.metadata_file, method=config.method, read_metadata=False)
 
     # Create data hierarchy from metadata
-    data_hierarchy = barmetr.build_hierarchy()
+    data_hierarchy = barmetr.build_hierarchy(path=os.path.join(barmetr.save_path, "data_hierarchy.pkl"))
 
     # Compute Shannon Diversity Index (SDI) inplace
     data_hierarchy = barmetr.compute_sdi(data_hierarchy, enabled=True)
