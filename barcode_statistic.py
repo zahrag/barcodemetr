@@ -127,8 +127,7 @@ class BarcodeMetric:
         """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
-            if rank != "dna_bin":
-                self.pwd._rank_dist(data_hierarchy, rank)
+            self.pwd._rank_dist(data_hierarchy[rank], rank)
 
     def compute_pwd_statistics(self, data_hierarchy, ranks=None):
         if ranks is None:
