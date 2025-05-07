@@ -12,10 +12,10 @@ def main(config):
     data_hierarchy = barmetr.build_hierarchy(path=os.path.join(barmetr.save_path, "data_hierarchy.pkl"))
 
     # Compute Shannon Diversity Index (SDI) inplace
-    data_hierarchy = barmetr.compute_sdi(data_hierarchy, enabled=True)
+    data_hierarchy = barmetr.compute_sdi(data_hierarchy, enabled=False)
 
     # Save in pickle to prevent re-computation
-    barmetr.create_pickle(data_hierarchy, os.path.join(barmetr.save_path, "data_hierarchy.pkl"))
+    barmetr.create_pickle(data_hierarchy, os.path.join(barmetr.save_path, "data_hierarchy.pkl"), enabled=False)
 
     # Compute and save in parquets identical DNA pairwise distances
     barmetr.compute_pwd(data_hierarchy)
@@ -28,7 +28,7 @@ def main(config):
                         title="Full Statistics of Identical DNA Barcodes",
                         display_table=True)
 
-    barmetr.save_in_pandas(barcode_stats, os.path.join(barmetr.save_path, "barcode_stats.csv"))
+    barmetr.save_in_pandas(barcode_stats, os.path.join(barmetr.save_path, "barcode_stats.csv"), enabled=True)
 
 
 
