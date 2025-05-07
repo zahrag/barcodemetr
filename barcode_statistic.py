@@ -13,9 +13,9 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 class BarcodeMetric:
 
-    def __init__(self, metadata_file="", method="pandas"):
+    def __init__(self, metadata_file="", method="pandas", read_metadata=False):
         self.metadata = metadata_file
-        self.df = self._read_metadata(metadata_file)
+        self.df = self._read_metadata(metadata_file, read_metadata=False)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         if method == "pandas":
@@ -28,7 +28,9 @@ class BarcodeMetric:
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
-    def _read_metadata(self, file):
+    def _read_metadata(self, file, read_metadata=False):
+        if not read_metadata:
+            return None
         if file.endswith(".tsv"):
             return pd.read_csv(file, sep='\t', low_memory=False)
         elif file.endswith(".csv"):
