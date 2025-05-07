@@ -224,7 +224,7 @@ class BarcodePWD(object):
           """
 
         # Convert the dictionary to a list of tuples [(species, sequences), ...]
-        print(f'Processing DNA barcodes pairwise distances across {rank} ...')
+        print(f'\nProcessing DNA barcodes pairwise distances across {rank} ...\n')
 
         tuple_list = [
             (subgroup, list(subgroup_entry['barcodes'].keys()))
