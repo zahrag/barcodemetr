@@ -1,22 +1,22 @@
 
 import os
-import pickle
-from tabulate import tabulate
 import numpy as np
 from tqdm import tqdm
-from pathlib import Path
-from collections import defaultdict
 import pandas as pd
+from collections import defaultdict
+
 from barcode_pwd_pandas import BarcodePWD as bar_pwd_panda
 from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
+
+from utils import *
 
 
 class BarcodeMetric:
 
-    def __init__(self, metadata_file="", method="pandas"):
+    def __init__(self, metadata_file="", method="pandas", load_metadata=False):
 
         self.metadata = metadata_file
-        self.df = self.load_metadata(metadata_file)
+        self.df = self.load_metadata(metadata_file, load_metadata)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         # Save all files in a pre-defined directory
@@ -30,8 +30,8 @@ class BarcodeMetric:
             self.pwd = bar_pwd_spark(save_path=self.save_path)
 
 
-    def load_metadata(self, file):
-        if not file:
+    def load_metadata(self, file, load_metadata):
+        if not load_metadata:
             return None
         if file.endswith(".tsv"):
             return pd.read_csv(file, sep='\t', low_memory=False)
@@ -59,7 +59,7 @@ class BarcodeMetric:
         """
 
         if path is not None and os.path.isfile(path):
-            return self.open_pickle(pickle_file=path)
+            return open_pickle(pickle_file=path)
 
         df = df if df is not None else self.df
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
@@ -97,7 +97,7 @@ class BarcodeMetric:
                 ]
                 subgroup_entry['sdi'] = self.sdi(sample_counts)
 
-        return self.convert_to_regular_dict(ranked_data)
+        return convert_to_regular_dict(ranked_data)
 
     def compute_barcodes_statistics(self, ranked_data):
 
@@ -135,33 +135,43 @@ class BarcodeMetric:
         for rank in taxonomy_ranks:
             self.pwd._rank_dists(ranked_data[rank], rank, path=self.save_path)
 
-    def compute_pwd_statistics(self, ranked_data, taxonomy_ranks=None):
+    def compute_pwd_statistics(self, ranked_data, taxonomy_ranks=None, save_distances_pandas=False):
 
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
 
         pwd_stats = {}
         for rank in taxonomy_ranks:
+            if rank == "species":
+                pwd_stats[rank] = {
+                                    "PWD-Mean": 0.0,
+                                    "PWD-Variance": 0.0,
+                                    "PWD-Std.Dev": 0.0,
+                                    "PWD-Min": 0.0,
+                                    "PWD-Max": 0.0,
+                                }
+                continue
             if rank in ranked_data:
                 distances_root = f"{self.save_path}/distances/{rank}"
                 if not os.path.exists(distances_root):
                     raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n "
                                      f"Compute pairwise distances across {rank} first."
                                      )
-                pwd_stats[rank] = self.pwd._rank_dist_stats(ranked_data[rank],
-                                                            rank,
-                                                            distances_root=distances_root)
+                pwd_stats[rank] = self.pwd._rank_dist_stats(rank,
+                                                            distances_root=distances_root,
+                                                            save_distances_pandas=save_distances_pandas,
+                                                            )
 
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
-    def compute_full_statistics(self, ranked_data=None):
+    def compute_full_statistics(self, ranked_data=None, save_distances_pandas=False):
 
         if not ranked_data:
             return
 
         barcode_stats = self.compute_barcodes_statistics(ranked_data)
 
-        pwd_stats = self.compute_pwd_statistics(ranked_data)
+        pwd_stats = self.compute_pwd_statistics(ranked_data, save_distances_pandas=save_distances_pandas)
 
         s_dict = defaultdict(list)
         ranks = list(ranked_data.keys())
@@ -179,67 +189,4 @@ class BarcodeMetric:
             print(f'Full Statistics of {rank} processed and collected.')
 
         return s_dict
-
-    @staticmethod
-    def convert_to_regular_dict(d):
-        if isinstance(d, defaultdict):
-            d = {k: BarcodeMetric.convert_to_regular_dict(v) for k, v in d.items()}
-        elif isinstance(d, dict):
-            d = {k: BarcodeMetric.convert_to_regular_dict(v) for k, v in d.items()}
-        return d
-
-    @staticmethod
-    def print_table(data_dict, title="", display_table=False):
-        if not display_table:
-            return
-        print("\n\n" + "+" + "-" * 143 + "+")
-        print(f"\t\t\t\t\t{title}")
-        headings = list(data_dict.keys())
-        values = list(data_dict.values())
-        rows = zip(*values)
-        formatted_rows = [
-            [f'{val: .2f}' if isinstance(val, float) else str(val) for val in row]
-            for row in rows
-        ]
-        print(tabulate(formatted_rows, headers=headings, tablefmt="grid"))
-
-    @staticmethod
-    def save_in_pandas(df, panda_file, save_statistics=False):
-        """Save distances as Pandas dataframe"""
-        if not save_statistics:
-            return
-        df.reset_index(inplace=True, drop=True)
-        if panda_file.endswith(".tsv"):
-            df.to_csv(panda_file, sep='\t', index=False)
-        elif panda_file.endswith(".csv"):
-            df.to_csv(panda_file, index=False)
-        else:
-            raise ValueError("Unsupported file extension. Use .tsv or .csv")
-
-    @staticmethod
-    def create_pickle(data=None, pickle_file=""):
-        if not data:
-            return
-        with open(pickle_file, 'wb') as f:
-            pickle.dump(data, f)
-
-    @staticmethod
-    def open_pickle(pickle_file=""):
-        if not pickle_file:
-            return
-        objects = []
-        with (open(pickle_file, "rb")) as openfile:
-            while True:
-                try:
-                    objects.append(pickle.load(openfile))
-                except EOFError:
-                    break
-        results = objects[0]
-
-        return results
-
-
-
-
-
 
