@@ -23,10 +23,10 @@ class BarcodeMetric:
         else:
             self.pwd = bar_pwd_spark()
 
+        # Save all files in a pre-defined directory
         self.save_path = os.path.join(os.path.dirname(metadata_file), "barcode_analysis", method)
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
-
 
     def _read_metadata(self, file):
         if file.endswith(".tsv"):
@@ -45,8 +45,19 @@ class BarcodeMetric:
         return sdi
 
     def build_hierarchy(self, df=None, taxonomy_ranks=None, path=None):
+        """
+        Build the barcode hierarchy, or load from a pickled file if path is provided.
 
-        if os.path.isfile(path):
+        Args:
+            df (pd.DataFrame, optional): DataFrame to use instead of reading from metadata.
+            taxonomy_ranks (list, optional): Taxonomic ranks to process.
+            path (str, optional): Path to a pickled hierarchy file to load.
+
+        Returns:
+            dict: Nested hierarchy of barcodes.
+        """
+
+        if path is not None and os.path.isfile(path):
             return self.open_pickle(path)
 
         df = df if df is not None else self.df
