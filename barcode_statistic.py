@@ -75,12 +75,16 @@ class BarcodeMetric:
 
         return data_hierarchy
 
-    def compute_sdi(self, data_hierarchy):
+    def compute_sdi(self, data_hierarchy, enabled=False):
         """
         Computes Shannon Diversity Index (SDI) for each (rank, subgroup) in the hierarchy.
         Updates the hierarchy in-place by storing 'sdi' per subgroup.
         SDI measures the diversity of barcodes within a subgroup.
         """
+
+        if not enabled:
+            return data_hierarchy
+
         for rank in data_hierarchy:
             for subgroup, subgroup_entry in tqdm(data_hierarchy[rank].items(), total=len(data_hierarchy[rank]), desc=f"Computing SDI of {rank}"):
                 sample_counts = [
