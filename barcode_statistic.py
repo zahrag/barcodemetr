@@ -1,4 +1,6 @@
 
+import os
+import pickle
 from tabulate import tabulate
 import numpy as np
 from tqdm import tqdm
@@ -9,20 +11,21 @@ from barcode_pwd_pandas import BarcodePWD as bar_pwd_panda
 from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 
-# Get the path of the currently running script
-current_directory = Path(__file__).parent
-
 class BarcodeMetric:
 
     def __init__(self, metadata_file="", method="pandas"):
         self.metadata = metadata_file
         self.df = self._read_metadata(metadata_file)
-        self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species", "dna_bin"]
+        self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         if method == "pandas":
             self.pwd = bar_pwd_panda()
         else:
             self.pwd = bar_pwd_spark()
+
+        self.save_path = os.path.join(os.path.dirname(metadata_file), "barcode_analysis", method)
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
 
 
     def _read_metadata(self, file):
@@ -41,7 +44,10 @@ class BarcodeMetric:
         sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
         return sdi
 
-    def build_hierarchy(self, df=None, taxonomy_ranks=None):
+    def build_hierarchy(self, df=None, taxonomy_ranks=None, path=None):
+
+        if os.path.isfile(path):
+            return self.open_pickle(path)
 
         df = df if df is not None else self.df
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
@@ -74,6 +80,7 @@ class BarcodeMetric:
                     for barcode_info in subgroup_entry['barcodes'].values()
                 ]
                 subgroup_entry['sdi'] = self._sdi(sample_counts)
+
         return self._convert(data_hierarchy)
 
     def compute_barcodes_statistics(self, data_hierarchy):
@@ -108,7 +115,8 @@ class BarcodeMetric:
         """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
-            self.pwd._rank_dist(data_hierarchy, rank)
+            if rank != "dna_bin":
+                self.pwd._rank_dist(data_hierarchy, rank)
 
     def compute_pwd_statistics(self, data_hierarchy, ranks=None):
         if ranks is None:
@@ -132,6 +140,7 @@ class BarcodeMetric:
         ranks = list(data_hierarchy.keys())
 
         for rank in ranks:
+
             s_dict['Barcode Statistics'].append(rank)
 
             # Merge per-rank statistics
@@ -168,10 +177,34 @@ class BarcodeMetric:
         print(tabulate(formatted_rows, headers=headings, tablefmt="grid"))
 
     @staticmethod
-    def save_statistics_to_tsv(data_dict, filename="statistics.tsv"):
-        df = pd.DataFrame(data_dict)
-        df.to_csv(filename, sep='\t', index=False)
-        print(f"Saved statistics to {filename}")
+    def save_in_pandas(df, panda_file):
+        """Save distances as Pandas dataframe"""
+        df.reset_index(inplace=True, drop=True)
+        if panda_file.endswith(".tsv"):
+            df.to_csv(panda_file, sep='\t', index=False)
+        elif panda_file.endswith(".csv"):
+            df.to_csv(panda_file, index=False)
+        else:
+            raise ValueError("Unsupported file extension. Use .tsv or .csv")
+
+    @staticmethod
+    def create_pickle(data, pickle_file):
+        with open(pickle_file, 'wb') as f:
+            pickle.dump(data, f)
+
+    @staticmethod
+    def open_pickle(pickle_file):
+
+        objects = []
+        with (open(pickle_file, "rb")) as openfile:
+            while True:
+                try:
+                    objects.append(pickle.load(openfile))
+                except EOFError:
+                    break
+        results = objects[0]
+
+        return results
 
 
 
