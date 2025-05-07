@@ -34,9 +34,11 @@ def save_in_pandas(data, path, _save=False):
     if not _save:
         return
 
-    # Check if data is dict of lists
+    # Convert based on data type
     if isinstance(data, dict) and all(isinstance(v, list) for v in data.values()):
         df = pd.DataFrame(data)
+    elif hasattr(data, "toPandas"):  # likely a PySpark DataFrame
+        df = data.toPandas()
     elif isinstance(data, pd.DataFrame):
         df = data
     else:
@@ -50,6 +52,7 @@ def save_in_pandas(data, path, _save=False):
         df.to_csv(path, index=False)
     else:
         raise ValueError("Unsupported file extension. Use .tsv or .csv")
+
 
 def load_from_pandas(file, load_file=False):
     if not load_file:
@@ -84,6 +87,7 @@ def open_pickle(pickle_file=""):
 
 
 def extract_chunks(rank, dists_dir, method="spark"):
+
     dists_dir = Path(dists_dir)
 
     if not dists_dir.exists():
@@ -110,7 +114,6 @@ def extract_chunks(rank, dists_dir, method="spark"):
         return chk_values
 
     else:
-
         raise ValueError(f"Unsupported method {method}")
 
 
