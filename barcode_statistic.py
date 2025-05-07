@@ -36,9 +36,6 @@ class BarcodeMetric:
         else:
             raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
-    def _convert(self, default_dict):
-        return self.convert_to_regular_dict(default_dict)
-
     def _sdi(self, sample_counts):
         proportions = np.array(sample_counts) / sum(sample_counts)
         sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
@@ -92,7 +89,7 @@ class BarcodeMetric:
                 ]
                 subgroup_entry['sdi'] = self._sdi(sample_counts)
 
-        return self._convert(data_hierarchy)
+        return self.convert_to_regular_dict(data_hierarchy)
 
     def compute_barcodes_statistics(self, data_hierarchy):
 
