@@ -68,7 +68,7 @@ class BarcodeMetric:
         SDI measures the diversity of barcodes within a subgroup.
         """
         for rank in data_hierarchy:
-            for subgroup, subgroup_entry in data_hierarchy[rank].items():
+            for subgroup, subgroup_entry in tqdm(data_hierarchy[rank].items(), total=len(data_hierarchy[rank]), desc=f"Computing SDI of {rank}"):
                 sample_counts = [
                     len(barcode_info['samples'])
                     for barcode_info in subgroup_entry['barcodes'].values()
