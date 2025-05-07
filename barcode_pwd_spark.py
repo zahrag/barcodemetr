@@ -10,7 +10,7 @@ from pyspark.sql.functions import col
 import textdistance
 
 from barcode_alignment import BarcodeAlignment
-from barcodemetr.utils import save_in_pandas
+from utils import *
 
 
 class BarcodePWD(object):
@@ -238,16 +238,19 @@ class BarcodePWD(object):
             self._save_in_parquet(final_distances, distances_path, _save=True)
             print(f'\n{rank} pairwise distances saved to {distances_path}.\n')
 
-    def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None, save_distances_pandas=False):
+    def _rank_dist_stats(self, rank, distances_root=None, save_distances_pandas=False):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param max_chunk: Maximum number of chunks of the subgroups of the rank.
         """
 
+        chks = extract_chunks(rank, distances_root, method="spark")
+        print(f"Save chunks: {chks}.")
+
         rank_stats = None
         df_spark = None
-        for chk in tqdm(range(max_chunk), total=max_chunk, desc=f"Computing statistics of {rank}"):
+        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc=f"Processing statistics of {rank}"):
 
             distances_dir = os.path.join(distances_root, f"chunk_{chk}")
             if not os.path.exists(distances_dir):
