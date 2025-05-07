@@ -83,19 +83,36 @@ def open_pickle(pickle_file=""):
     return results
 
 
-def extract_chunks(rank, dists_dir):
+def extract_chunks(rank, dists_dir, method="spark"):
     dists_dir = Path(dists_dir)
 
     if not dists_dir.exists():
         raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n"
                          f"Compute pairwise distances across {rank} first.")
 
-    chk_values = [
-        int(f.name.split("_chunk_")[1].split(".")[0])
-        for f in dists_dir.iterdir()
-        if f.name.startswith(f"barcode_pwd_{rank}_chunk_") and f.name.endswith(".csv")
-    ]
-    return chk_values
+    if method == "panda":
+
+        chk_values = [
+            int(f.name.split("_chunk_")[1].split(".")[0])
+            for f in dists_dir.iterdir()
+            if f.name.startswith(f"barcode_pwd_{rank}_chunk_") and f.name.endswith(".csv")
+        ]
+
+        return chk_values
+
+    elif method == "spark":
+
+        chk_values = [
+            int(f.name.split("_")[1])
+            for f in dists_dir.iterdir()
+            if f.is_dir() and f.name.startswith("chunk_") and f.name.split("_")[1].isdigit()
+        ]
+        return chk_values
+
+    else:
+
+        raise ValueError(f"Unsupported method {method}")
+
 
 
 
