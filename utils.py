@@ -13,8 +13,10 @@ def convert_to_regular_dict(d):
     return d
 
 def print_table(data_dict, title="", display_table=False):
+
     if not display_table:
         return
+
     print("\n\n" + "+" + "-" * 143 + "+")
     print(f"\t\t\t\t\t{title}")
     headings = list(data_dict.keys())
