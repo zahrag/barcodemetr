@@ -16,7 +16,7 @@ class BarcodeMetric:
 
     def __init__(self, metadata_file="", method="pandas"):
         self.metadata = metadata_file
-        self.df = self._read_metadata()
+        self.df = self._read_metadata(metadata_file)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species", "dna_bin"]
 
         if method == "pandas":
@@ -25,8 +25,13 @@ class BarcodeMetric:
             self.pwd = bar_pwd_spark()
 
 
-    def _read_metadata(self):
-        return pd.read_csv(self.metadata, low_memory=False)
+    def _read_metadata(self, file):
+        if file.endswith(".tsv"):
+            return pd.read_csv(file, sep='\t', low_memory=False)
+        elif file.endswith(".csv"):
+            return pd.read_csv(file, low_memory=False)
+        else:
+            raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     def _convert(self, default_dict):
         return self.convert_to_regular_dict(default_dict)
