@@ -1,27 +1,15 @@
 
 
-import textdistance
 import os
 import glob
-
-from attr.validators import max_len
-from gitdb.fun import chunk_size
 from tqdm import tqdm
-import logging
 import random
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import col
-from functools import reduce
-from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import FloatType
 import textdistance
 
-import pandas as pd
 from barcode_alignment import perform_mafft_alignment
-from barcode_sampling import BarcodeSampler
-from pathlib import Path
-current_directory = Path(__file__).parent
 
 
 # @pandas_udf(FloatType())
@@ -213,7 +201,7 @@ class BarcodePWD(object):
 
         return (name, distances)
 
-    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000):
+    def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
           This function process distance computation per taxonomic rank using pandas.
           :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
@@ -257,29 +245,26 @@ class BarcodePWD(object):
                 final_distances = distances if final_distances is None else final_distances.union(distances)
 
             # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
-            distances_dir = f"{current_directory}/distances/{rank}/chunk_{chk}"
+            distances_dir = f"{path}/distances/{rank}/chunk_{chk}"
+            if not os.path.exists(distances_dir):
+                os.makedirs(distances_dir)
             self._save_in_parquet(final_distances, distances_dir, _save=True)
             print('')
 
-    def _rank_dist_stats(self, rank, max_chunk=10):
+    def _rank_dist_stats(self, rank, max_chunk=10, distances_root=None):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param max_chunk: Maximum number of chunks of the subgroups of the rank.
         """
 
-        rank_distances_dir = f"{current_directory}/distances/{rank}"
-        if not os.path.exists(rank_distances_dir):
-            raise ValueError (f"The directory of distances files of {rank} does NOT exist.\n "
-                              f"Compute pairwise distances across {rank} first."
-                              )
         print(f'Processing DNA barcodes statistics across {rank} ...')
 
         rank_stats = None
         df_spark = None
         for chk in tqdm(range(max_chunk), total=max_chunk, desc="Processing statistics"):
 
-            distances_dir = os.path.join(rank_distances_dir, f"chunk_{chk}")
+            distances_dir = os.path.join(distances_root, f"chunk_{chk}")
             if not os.path.exists(distances_dir):
                 continue
 
