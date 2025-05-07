@@ -128,15 +128,6 @@ class BarcodeMetric:
 
         pwd_stats = {}
         for rank in taxonomy_ranks:
-            if rank == "species":
-                pwd_stats[rank] = {
-                                    "PWD-Mean": 0.0,
-                                    "PWD-Variance": 0.0,
-                                    "PWD-Std.Dev": 0.0,
-                                    "PWD-Min": 0.0,
-                                    "PWD-Max": 0.0,
-                                }
-                continue
             if rank in ranked_data:
                 distances_root = f"{self.save_path}/distances/{rank}"
                 if not os.path.exists(distances_root):
