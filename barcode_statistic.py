@@ -57,7 +57,7 @@ class BarcodeMetric:
         """
 
         if path is not None and os.path.isfile(path):
-            return self.open_pickle(path)
+            return self.open_pickle(path, enabled=True)
 
         df = df if df is not None else self.df
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
@@ -190,8 +190,10 @@ class BarcodeMetric:
         print(tabulate(formatted_rows, headers=headings, tablefmt="grid"))
 
     @staticmethod
-    def save_in_pandas(df, panda_file):
+    def save_in_pandas(df, panda_file, enabled=False):
         """Save distances as Pandas dataframe"""
+        if not enabled:
+            return
         df.reset_index(inplace=True, drop=True)
         if panda_file.endswith(".tsv"):
             df.to_csv(panda_file, sep='\t', index=False)
@@ -201,13 +203,16 @@ class BarcodeMetric:
             raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
     @staticmethod
-    def create_pickle(data, pickle_file):
+    def create_pickle(data, pickle_file, enabled=False):
+        if not enabled:
+            return
         with open(pickle_file, 'wb') as f:
             pickle.dump(data, f)
 
     @staticmethod
-    def open_pickle(pickle_file):
-
+    def open_pickle(pickle_file, enabled=False):
+        if not enabled:
+            return
         objects = []
         with (open(pickle_file, "rb")) as openfile:
             while True:
