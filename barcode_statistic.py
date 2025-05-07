@@ -111,7 +111,7 @@ class BarcodeMetric:
                 'Std.Dev Shannon Diversity Index': np.std(sdi_lst),
             }
 
-        print(f"Identical DNA Barcode Statistics: {barcode_stats}")
+        print(f"\nIdentical DNA Barcode Statistics: {barcode_stats}\n")
         return barcode_stats
 
     def compute_pwd(self, ranked_data=None, taxonomy_ranks=None):
