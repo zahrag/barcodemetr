@@ -11,14 +11,14 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 class BarcodeMetric:
 
-    def __init__(self, metadata_file="", method="pandas", load_metadata=False):
+    def __init__(self, method="pandas", metadata_file="", save_path="", load_metadata=False):
 
         self.metadata = metadata_file
         self.df = load_from_pandas(metadata_file, load_file=load_metadata)
         self.taxonomy_ranks = ["phylum", "class", "order", "family", "subfamily", "genus", "species"]
 
         # Save all files in a pre-defined directory
-        self.save_path = os.path.join(os.path.dirname(metadata_file), "barcode_analysis", method)
+        self.save_path = save_path
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
