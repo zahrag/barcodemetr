@@ -113,6 +113,8 @@ To visualize the statics execute the following:
 ```bash
 python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
 ``` 
+
+
 <div align="center">
   <figure>
     <img src="figures/sdi_distributions.png" 
