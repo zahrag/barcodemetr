@@ -37,7 +37,7 @@ The code computes the average pairwise distances between unique DNA barcodes at 
 The repository supports two implementations of DNA barcodes pairwise distance calculations one with Pandas and the other with Apache Spark (PySpark).
 For optimal performnace conduct experiments in two separate phases:
 
-> **ℹ️ Note** For small size data Pandas implementation and for the large data sizes like BIOSCAN-5M Apache Spark is recommended.
+> **ℹ️ Note** Use the Pandas implementation for small datasets. For large datasets such as BIOSCAN-5M, the Apache Spark implementation is recommended.
 
 #### I. Calculate&Save SDI and Pairwise Distances
 To initially calculate DNA barcodes pairwise distances and save them in the Parquet files or Pandas dataframes, execute:
