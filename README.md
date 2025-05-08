@@ -78,7 +78,7 @@ The Damerau-Levenshtein distance extends the standard Levenshtein metric by incl
 in addition to insertions, deletions, and substitutions. It quantifies the similarity between DNA sequences based on 
 the minimum number of such edits required to transform one sequence into another.
 
-The code computes the average pairwise distances between unique DNA barcodes at various taxonomic ranks. For each subgroup:
+The code computes the average pairwise Damerau-Levenshtein distances between unique DNA barcodes at various taxonomic ranks. For each subgroup:
 
 - Groups with <4 unique sequences are excluded.
 - If >1,000 sequences exist, 1,000 are randomly sampled.
