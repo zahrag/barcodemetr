@@ -1,4 +1,14 @@
 # barcodemetr
+
+<div align="center">
+  <figure>
+    <img src="figures/dna.webp" 
+         alt="class." />
+    <figcaption><b>Figure 1: </b>Distribution of Shannon Diversity Index (SDI) across subgroups of taxonomic ranks. The x-axis represents the taxonomic ranks. The results indicate that DNA barcode diversity decreases as you move from higher (less specific) to lower (more specific) taxonomic ranks.
+    </figcaption>
+  </figure>
+</div>
+
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
 At each rank, the data is structured hierarchically: every taxonomic rank consists of subgroups, and each subgroup 
