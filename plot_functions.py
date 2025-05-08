@@ -50,7 +50,7 @@ def plot_box(df, fig_file,
     fig_path = os.path.join(os.path.dirname(fig_file), plt_type)
     fig_name = os.path.splitext(os.path.basename(fig_file))[0]
 
-    fig.show()
+    # fig.show()
     if not os.path.exists(fig_path):
         os.makedirs(fig_path)
 
