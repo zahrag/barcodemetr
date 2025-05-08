@@ -121,6 +121,7 @@ class BarcodeMetric:
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
             self.pwd._rank_dists(ranked_data[rank], rank, path=self.save_path)
+        self.pwd._end_spark()
 
     def compute_pwd_statistics(self, ranked_data, taxonomy_ranks=None, save_distances_pandas=False):
 
@@ -151,6 +152,7 @@ class BarcodeMetric:
                                                             save_distances_pandas=save_distances_pandas,
                                                             )
 
+        self.pwd._end_spark()
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
