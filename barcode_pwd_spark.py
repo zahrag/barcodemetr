@@ -206,9 +206,7 @@ class BarcodePWD(object):
             if len(subgroup_entry['barcodes']) > min_barcodes
         ]
 
-        tuple_chunks = [tuple_list[i:i + chunk_size]
-                             for i in range(0, len(tuple_list), chunk_size)
-                             ]
+        tuple_chunks = [tuple_list[i:i + chunk_size] for i in range(0, len(tuple_list), chunk_size) ]
 
         chk_ended = 0
         max_barcodes = 0 if rank == 'species' else max_barcodes  # Process all barcodes of the species
@@ -232,25 +230,22 @@ class BarcodePWD(object):
 
             # ---- Save the spark dataframe of pairwise distance for the subgroups existed in the chunk chk
             path = path if path is not None else self.save_path
-            distances_path = f"{path}/distances/{rank}/chunk_{chk}"
+            distances_path = os.path.join(path, rank, f"chunk_{chk}")
             if not os.path.exists(distances_path):
                 os.makedirs(distances_path)
             self._save_in_parquet(final_distances, distances_path, _save=True)
             print(f'\n{rank} pairwise distances saved to {distances_path}.\n')
 
-    def _rank_dist_stats(self, rank, distances_root=None, save_distances_pandas=False):
+    def _rank_dist_stats(self, rank, chunks, distances_root=None, save_distances_pandas=False):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param max_chunk: Maximum number of chunks of the subgroups of the rank.
         """
 
-        chks = extract_chunks(rank, distances_root, method="spark")
-        print(f"\nSaved chunks: {chks}.\n")
-
         rank_stats = None
         df_spark = None
-        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc=f"Processing statistics of {rank}"):
+        for chk_num, chk in tqdm(enumerate(chunks), total=len(chunks), desc=f"Processing statistics of {rank}"):
 
             distances_dir = os.path.join(distances_root, f"chunk_{chk}")
 
@@ -292,7 +287,7 @@ class BarcodePWD(object):
         }
 
         # Additionally save distances in Pandas dataframe
-        path_pd = f"{self.save_path}/distances/barcodes_pwd_{rank}.csv"
+        path_pd = os.path.join(self.save_path, f"barcodes_pwd_{rank}.csv")
         save_in_pandas(df_spark, path_pd, _save=save_distances_pandas)
 
         return rank_stats_dict
