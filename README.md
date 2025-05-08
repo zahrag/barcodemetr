@@ -28,7 +28,6 @@ If you make use of the BIOSCAN-5M dataset and/or this code repository, please ci
 ### DNA Barcode Sequence
 The DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
 and Guanine (G)—within a specific gene region, such as the mitochondrial cytochrome c oxidase subunit I (COI) gene. 
-Each nucleotide is depicted using a distinct color block to enhance visual interpretation:
 
 ```
 TTTATATTTTATTTTTGGAGCATGATCAGGAATAGTTGGAACTTCAATAAGTTTATTAATTCGAACAGAATTAAGCCAACCAGGATCAACATTTAT ....
