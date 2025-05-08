@@ -59,6 +59,46 @@ To visualize the statics execute the following:
 ```bash
 python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
 ``` 
+<div align="center">
+  <figure>
+    <img src="figures/sdi_distributions.png" 
+         alt="class." />
+    <figcaption><b>Figure 1: </b>Distribution of Shannon Diversity Index (SDI) across subgroups of taxonomic ranks. 
+          The x-axis shows the Taxonomic ranks.
+    categories sorted alphabetically.</figcaption>
+  </figure>
+</div>
 
+<div align="center">
+  <figure>
+    <img src="figures/class_distance_distribution.png" 
+         alt="class." />
+    <figcaption><b>Figure 1: </b>Distribution of pairwise distances of subgroups of class. The x-axis shows the subgroup
+    categories sorted alphabetically.</figcaption>
+  </figure>
+</div>
+
+<div align="center">
+  <figure>
+    <img src="figures/order_distance_distribution.png" 
+         alt="order." />
+    <figcaption><b>Figure 2: </b>Distribution of pairwise distances of subgroups of order. The x-axis shows the subgroup
+    categories sorted alphabetically.</figcaption>
+  </figure>
+</div>
+
+<div align="center">
+  <figure>
+    <img src="figures/species_distance_distribution.png" 
+         alt="species." />
+  </figure>
+</div>
+<div align="left">
+  <p><b>Figure 3:</b> Distribution of pairwise distances of subgroups of species. Among the species, there are
+    8,372 distinct subgroups with sufficient identical barcodes for calculating pairwise distances, which
+    makes visualization challenging. To address this, the groups are sorted in descending order based
+    on their mean distances and partitioned into 100 bins. These bins are used to plot the distribution
+    of pairwise distances within the species rank. The mean distance of each bin is displayed along the
+    x-axis.</div>
 
 
