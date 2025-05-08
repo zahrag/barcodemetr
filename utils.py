@@ -4,7 +4,7 @@ import pickle
 from tabulate import tabulate
 from collections import defaultdict
 import pandas as pd
-
+import os
 
 def convert_to_regular_dict(d):
     if isinstance(d, defaultdict):
@@ -65,10 +65,12 @@ def load_from_pandas(file, load_file=False):
     else:
         raise ValueError("Unsupported file extension. Use .tsv or .csv")
 
-def create_pickle(data=None, pickle_file=""):
-    if not data:
+def create_pickle(data, path=None):
+
+    if path is not None and os.path.isfile(path):
         return
-    with open(pickle_file, 'wb') as f:
+
+    with open(path, 'wb') as f:
         pickle.dump(data, f)
 
 def open_pickle(pickle_file=""):

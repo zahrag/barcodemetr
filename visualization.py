@@ -126,7 +126,7 @@ def agg_bin_subgroups(df, num_bins=100, _plt=False):
 
 def main(args):
 
-    ranked_data = open_pickle(pickle_file=args.data_hierarchy_file)
+    ranked_data = open_pickle(pickle_file=args.ranked_data_file)
 
     # Plot SDI distributions Across 7 Taxonomic Ranks
     _plt_sdi(args, ranked_data, _plt=False)
@@ -227,27 +227,27 @@ if __name__ == '__main__':
     parser.add_argument("--metadata_file",
                         type=str,
                         help="Path to the metadata CSV file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/BIOSCAN_5M_Insect_Dataset_metadata.csv")
+                        default="./BIOSCAN_5M_Insect_Dataset_metadata.csv")
 
-    parser.add_argument("--data_hierarchy_file",
+    parser.add_argument("--ranked_data_file",
                         type=str,
                         help="Path to the ranked data Pickle file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/data_hierarchy.pkl")
+                        default="./data_hierarchy.pkl")
 
     parser.add_argument("--distances_path",
                         type=str,
-                        help="Path to the distances CSV file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/distances")
+                        help="Path to the distances Parquet files",
+                        default="./distances")
 
     parser.add_argument("--save_path",
                         type=str,
-                        help="Path to the metadata CSV file",
-                        default="/home/zahra/Desktop/PhyloTransNet/tmp/bioscan5m/metadata/csv/barcode_analysis/spark/distances_figures")
+                        help="Path to the directory to save the figures",
+                        default="./distances_figures")
 
     parser.add_argument('--create_plots',
                         default=False,
                         action='store_true',
-                        help='IF plot')
+                        help='IF plotting?')
 
     configs = parser.parse_args()
     main(configs)

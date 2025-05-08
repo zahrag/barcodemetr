@@ -13,24 +13,21 @@ def main(configs):
                             )
 
     # Create ranked data hierarchy from metadata
-    ranked_data = barmetr.build_hierarchy()
+    ranked_data = barmetr.build_hierarchy(path=configs.ranked_data_file)
 
     # Compute Shannon Diversity Index (SDI) inplace
-    ranked_data = barmetr.compute_sdi(ranked_data,
-                                      enabled=configs.compute_sdi,
-                                      )
+    ranked_data = barmetr.compute_sdi(ranked_data, path=configs.ranked_data_file)
 
     # Save in pickle to prevent re-computation
-    create_pickle(data=ranked_data,
-                  pickle_file=configs.ranked_data_file,
-                  )
+    create_pickle(ranked_data, path=configs.ranked_data_file)
 
-    # Compute and save in parquets identical DNA pairwise distances
-    barmetr.compute_pwd(ranked_data=ranked_data)
+    # Compute and save in parquets the identical DNA's pairwise distances
+    barmetr.compute_pwd(ranked_data, _enabled=configs.compute_pwd)
 
     # Compute the full statistics of the identical DNA barcodes
-    barcode_stats_full = barmetr.compute_full_statistics(ranked_data=ranked_data,
-                                                         save_distances_pandas=configs.save_distances_pandas
+    barcode_stats_full = barmetr.compute_full_statistics(ranked_data,
+                                                         save_distances_pandas=configs.save_distances_pandas,
+                                                         enabled=configs.compute_full_statistics,
                                                          )
 
     # Print full statistics
@@ -76,16 +73,15 @@ if __name__ == "__main__":
                         action='store_true',
                         help='IF loading metadata (save time by setting False when ranked data is available)?')
 
-
-    parser.add_argument('--compute_sdi',
-                        default=False,
-                        action='store_true',
-                        help='IF computing Shannon Diversity Index (SDI)?')
-
     parser.add_argument('--compute_pwd',
                         default=False,
                         action='store_true',
                         help='IF computing pairwise distances of identical DNA barcode sequences?')
+
+    parser.add_argument('--compute_full_statistics',
+                        default=False,
+                        action='store_true',
+                        help='IF enabling calculations of full DNA barcode statistics?')
 
     parser.add_argument('--display_table',
                         default=False,
