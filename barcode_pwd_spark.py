@@ -253,8 +253,6 @@ class BarcodePWD(object):
         for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc=f"Processing statistics of {rank}"):
 
             distances_dir = os.path.join(distances_root, f"chunk_{chk}")
-            if not os.path.exists(distances_dir):
-                continue
 
             df = self._load_from_parquet(distances_dir)
             df_spark = df if df_spark is None else df_spark.union(df)
