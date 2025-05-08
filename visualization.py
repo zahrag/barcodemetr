@@ -20,16 +20,6 @@ def _plt_sdi(args, ranked_data, _plt=False):
 
     df_sdi = pd.DataFrame(rows)
 
-    # Define a list of 10 colors
-    color_dict = {
-        "phylum": "#1f77b4",
-        "class": "#ff7f0e",
-        "order": "#2ca02c",
-        "family": "#d62728",
-        "subfamily": "#9467bd",
-        "genus": "#8c564b",
-        "species": "#e377c2",
-    }
     weights = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
     colors = plt.cm.Reds(weights)
     color_hex = [mcolors.to_hex(color) for color in colors]
@@ -112,8 +102,10 @@ def agg_bin_subgroups(df, num_bins=100, _plt=False):
     # Sort by rank for better readability
     mean_distances = mean_distances.sort_values(by='rank')
 
-    mean_distances['bins'] = pd.qcut(mean_distances['rank'], q=num_bins,
-                                     labels=[f'Bin {i + 1}' for i in range(num_bins)])
+    mean_distances['bins'] = pd.qcut(mean_distances['rank'],
+                                     q=num_bins,
+                                     labels=[f'Bin {i + 1}' for i in range(num_bins)]
+                                     )
 
     # Calculate mean distances for each bin
     bin_means = mean_distances.groupby('bins')['mean_distance'].mean()
@@ -147,14 +139,17 @@ def main(args):
 
     if args.rank in ['family', 'subfamily', 'genus', 'species']:
 
-        num_bins = 10, #100
+        assert isinstance(distances, pd.DataFrame), "Only Pandas DataFrames are supported for plotting."
+
         unique_groups = distances['subgroup_name'].unique()
-        print(len(unique_groups))
+        print(f'Number of unique subgroups of {args.rank}: {len(unique_groups)}')
+
+        num_bins = 10 #100
         df = agg_bin_subgroups(distances, num_bins=num_bins)
 
         fig_file = os.path.join(args.save_path, f'{args.rank}_distributions.pdf')
         plot_box_bin(df, fig_file,
-                     fig_format='svg',
+                     fig_format='png',
                      x="bins",
                      y="mean_distance",
                      x_label=f'{args.rank.capitalize()} name',
@@ -166,7 +161,9 @@ def main(args):
 
         assert isinstance(distances, pd.DataFrame), "Only Pandas DataFrames are supported for plotting."
 
-        # Order subgroups
+        unique_groups = distances['subgroup_name'].unique()
+        print(f'Number of unique subgroups of {args.rank}: {len(unique_groups)}')
+
         rank_dict = ranked_data[args.rank]
         # Sort the subgroup names within that rank by descending SDI value.
         sorted_group_names = sorted(rank_dict.keys(), key=lambda g: rank_dict[g]['sdi'], reverse=True)
@@ -202,8 +199,6 @@ def main(args):
         else:
             color_dict = order_color_map
 
-        unique_groups = distances['subgroup_name'].unique()
-        print(len(unique_groups))
         fig_file = os.path.join(args.save_path, f'{args.rank}_distributions.pdf')
         plot_box(distances, fig_file,
                  color_dict=color_dict,
