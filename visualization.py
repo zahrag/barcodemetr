@@ -62,7 +62,7 @@ def load_distances(args, _to_panda=False):
         df = pwd._load_from_parquet(distances_dir_chk)
         distances = df if distances is None else distances.union(df)
 
-    # Convert Spark DataFrame to Pandas if necessary
+    # Convert Spark DataFrame to Pandas: NOTE that this takes time
     distances_pandas = None
     if _to_panda:
         distances_pandas = distances.toPandas()
@@ -106,7 +106,7 @@ def agg_bin_subgroups(df, num_bins=100, _plt=False):
     # Rename the columns for clarity: 'distance' changed to 'mean_distance'
     mean_distances.columns = ['subgroup_name', 'mean_distance']
 
-    # Rank the groups based on mean distance descending (sorting them so that larger numbers come first, followed by smaller numbers)
+    # Rank the groups based on mean distance descending (Larger numbers come first, followed by smaller numbers)
     mean_distances['rank'] = mean_distances['mean_distance'].rank(method='first', ascending=False)
 
     # Sort by rank for better readability
@@ -140,10 +140,10 @@ def main(args):
     _plt_sdi(args, ranked_data, _plt=False)
 
     # Load pairwise distances of DNA barcode from parquets
-    distances, distances_pandas = load_distances(args, _to_panda=True)
+    distances_spark, distances = load_distances(args, _to_panda=True)
 
     # Sanity checks of the number of distances
-    check_match_mismatch(args, distances, ranked_data, _check=False)
+    check_match_mismatch(args, distances_spark, ranked_data, _check=False)
 
     if args.rank in ['family', 'subfamily', 'genus', 'species']:
 
@@ -163,6 +163,8 @@ def main(args):
                      _plt=args.create_plots)
 
     elif args.rank in ["class", "order"]:
+
+        assert isinstance(distances, pd.DataFrame), "Only Pandas DataFrames are supported for plotting."
 
         # Order subgroups
         rank_dict = ranked_data[args.rank]
