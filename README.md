@@ -117,9 +117,8 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   <figure>
     <img src="figures/sdi_distributions.png" 
          alt="class." />
-    <figcaption><b>Figure 1: </b>Distribution of Shannon Diversity Index (SDI) across subgroups of taxonomic ranks. 
-          The x-axis shows the Taxonomic ranks.
-    categories sorted alphabetically.</figcaption>
+    <figcaption><b>Figure 1: </b>Distribution of Shannon Diversity Index (SDI) across subgroups of taxonomic ranks. The x-axis represents the taxonomic ranks. The results indicate that DNA barcode diversity decreases as you move from higher (less specific) to lower (more specific) taxonomic ranks.
+    </figcaption>
   </figure>
 </div>
 
