@@ -92,15 +92,14 @@ For optimal performnace conduct experiments in two separate phases:
 
 > **ℹ️ Note** Use the Pandas implementation for small datasets. For large datasets such as BIOSCAN-5M, the Apache Spark implementation is recommended.
 
-#### I. Calculate&Save SDI and Pairwise Distances
-To initially calculate DNA barcodes pairwise distances and save them in the Parquet files or Pandas dataframes, execute:
-
+#### I. Calculate & Save SDI and Pairwise Distances
+To calculate DNA barcode pairwise distances and save them in Parquet files or Pandas dataframes, run the following command:
 ```bash
 python main.py --method spark --compute_pwd --load_metadata --metadata_file <file-path> --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
 
 #### II.  Enable Statistical Processing of SDI and Pairwise Distances
-To extract the statistics based on saved sdi and pairwise distances execute:
+To extract statistics from the saved SDI and pairwise distances, execute the following:
 
 ```bash
 python main.py --method spark --compute_full_statistics --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
