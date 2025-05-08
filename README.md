@@ -1,7 +1,7 @@
 # barcodemetr
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
-At each rank, the data is structured hierarchically: every taxonomic consists of subgroups, and each subgroup 
+At each rank, the data is structured hierarchically: every taxonomic rank consists of subgroups, and each subgroup 
 includes identical DNA barcode sequences. Figure 1 illustrates this hierarchical organization.
 
 ### DNA Barcode Sequence
