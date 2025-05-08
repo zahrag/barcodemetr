@@ -34,10 +34,10 @@ Each nucleotide is depicted using a distinct color block to enhance visual inter
 TTTATATTTTATTTTTGGAGCATGATCAGGAATAGTTGGAACTTCAATAAGTTTATTAATTCGAACAGAATTAAGCCAACCAGGATCAACATTTAT ....
 ```
 
-- Adenine (A): Red
-- Thymine (T): Blue
-- Cytosine (C): Green
-- Guanine (G): Yellow
+- Adenine (A) 
+- Thymine (T)
+- Cytosine (C)
+- Guanine (G)
 
 ### Shannon Diversity Index (SDI)
 The Shannon Diversity Index (SDI) quantifies genetic diversity by considering both:
