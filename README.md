@@ -50,11 +50,15 @@ python main.py --method spark --compute_pwd --load_metadata --metadata_file <fil
 To extract the statistics based on saved sdi and pairwise distances execute:
 
 ```bash
-python main.py --method spark --enable_full_stats --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
+python main.py --method spark --compute_full_statistics --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
+
+#### III.  Visualization
+To visualize the statics execute the following:
 
 ```bash
 python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
 ``` 
+
 
 
