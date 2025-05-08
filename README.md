@@ -4,7 +4,7 @@
   <figure>
     <img src="figures/dna.webp" 
          alt="class." />
-    <figcaption><b>Figure 1: </b>Distribution of Shannon Diversity Index (SDI) across subgroups of taxonomic ranks. The x-axis represents the taxonomic ranks. The results indicate that DNA barcode diversity decreases as you move from higher (less specific) to lower (more specific) taxonomic ranks.
+    <figcaption><b>Figure 1: </b>DNA Nucleotide Barcode Sequences.
     </figcaption>
   </figure>
 </div>
