@@ -39,6 +39,21 @@ TTTATATTTTATTTTTGGAGCATGATCAGGAATAGTTGGAACTTCAATAAGTTTATTAATTCGAACAGAATTAAGCCAAC
 - Cytosine (C): Green
 - Guanine (G): Yellow
 
+### Shannon Diversity Index (SDI)
+The Shannon Diversity Index (SDI) quantifies genetic diversity by considering both:
+
+- **Richness:** Number of unique DNA barcodes
+- **Evenness:** Distribution of samples across those barcodes
+
+A high SDI indicates a diverse subgroup with evenly distributed barcodes, while a low SDI reflects dominance by a few barcodes (i.e., low evenness and redundancy).
+
+For a subgroup *T* with *N* unique barcodes:
+
+SDI<sub>T</sub> = -∑<sub>i=1</sub><sup>N</sup> p<sub>i</sub> log<sub>2</sub>(p<sub>i</sub>)
+
+Where:
+- p<sub>i</sub> is the proportion of samples with the *i*-th barcode.
+- The sum runs over all *N* unique barcodes in subgroup *T*.
 
 ### Damerau-Levenshtein Distance for DNA Barcodes
 The Damerau-Levenshtein distance extends the standard Levenshtein metric by including adjacent character transpositions 
