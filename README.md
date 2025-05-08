@@ -1,12 +1,12 @@
 # barcodemetr
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
-At each rank, the data is structured hierarchically: every group-level consists of subgroups, and each subgroup 
+At each rank, the data is structured hierarchically: every taxonomic consists of subgroups, and each subgroup 
 includes identical DNA barcode sequences. Figure 1 illustrates this hierarchical organization.
 
 ### DNA Barcode Sequence
 
-The illustrated DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
+The DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
 and Guanine (G)—within a specific gene region, such as the mitochondrial cytochrome c oxidase subunit I (COI) gene. 
 Each nucleotide is depicted using a distinct color block to enhance visual interpretation:
 
