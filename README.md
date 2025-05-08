@@ -47,6 +47,7 @@ For a subgroup *T* with *N* unique barcodes:
 <div align="center">
 SDI<sub>T</sub> = -∑<sub>i=1</sub><sup>N</sup> p<sub>i</sub> log<sub>2</sub>(p<sub>i</sub>)
 </div>
+
 Where:
 - p<sub>i</sub> is the proportion of samples with the *i*-th barcode.
 - The sum runs over all *N* unique barcodes in subgroup *T*.
