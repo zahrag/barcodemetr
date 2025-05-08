@@ -84,10 +84,8 @@ class BarcodePWD(object):
             for subgroup, subgroup_entry in rank_hierarchy.items()
             if len(subgroup_entry['barcodes']) > min_barcodes
         ]
-        # Create chunks of subgroups
-        tuple_chunks = [tuple_list[i:i + chunk_size]
-                        for i in range(0, len(tuple_list), chunk_size)
-                        ]
+
+        tuple_chunks = [tuple_list[i:i + chunk_size] for i in range(0, len(tuple_list), chunk_size) ]
 
         max_barcodes = 0 if rank == 'species' else max_barcodes     # Process all barcodes of the species
         for chk, chunk in enumerate(tuple_chunks):
@@ -106,29 +104,25 @@ class BarcodePWD(object):
 
             # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
             path = path if path is not None else self.save_path
-            distances_dir = f"{path}/distances/{rank}/chunk_{chk}"
-            if not os.path.exists(distances_dir):
-                os.makedirs(distances_dir)
-            save_in_pandas(final_distances,
-                           os.path.join(distances_dir, f'barcode_pwd_{rank}_chunk_{chk}.csv'),
-                           _save=True
-                           )
 
-    def _rank_dist_stats(self, rank, distances_root=None):
+            file_path = os.path.join(path, rank, f"chunk_{chk}", f'barcode_pwd_{rank}_chunk_{chk}.csv')
+            if not os.path.exists(os.path.dirname(file_path)):
+                os.makedirs(os.path.dirname(file_path))
+
+            save_in_pandas(final_distances, file_path, _save=True)
+
+    def _rank_dist_stats(self, rank, chunks, distances_root=None):
 
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         """
 
-        chks = extract_chunks(rank, distances_root, method="pandas")
-        print(f"Save chunks: {chks}.")
-
         rank_stats = None
         df_pandas = None
-        for chk_num, chk in tqdm(enumerate(chks), total=len(chks), desc=f"Processing statistics of {rank}"):
+        for chk_num, chk in tqdm(enumerate(chunks), total=len(chunks), desc=f"Processing statistics of {rank}"):
 
-            dist_file = f'{distances_root}/barcodes_pwd_{rank}_chunk_{chk}.csv'
+            dist_file = os.path.join(distances_root, f"chunk_{chk}", f"barcodes_pwd_{rank}_chunk_{chk}.csv")
             df = pd.read_csv(dist_file, low_memory=False)
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
@@ -160,7 +154,7 @@ class BarcodePWD(object):
         })
 
         # Show the result
-        print(aggregated_rank_stat)
+        # print(aggregated_rank_stat)
 
         # Collect the results into a row
         aggregated_row = aggregated_rank_stat.to_frame().T
