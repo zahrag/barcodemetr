@@ -81,12 +81,12 @@ the minimum number of such edits required to transform one sequence into another
 The code computes the average pairwise Damerau-Levenshtein distances between unique DNA barcodes at various taxonomic ranks. For each subgroup:
 
 - Groups with <4 unique sequences are excluded.
-- If >1,000 sequences exist, 1,000 are randomly sampled.
+- For groups with >1,000 sequences, 1,000 are randomly sampled.
 - Sequences are first aligned using MAFFT.
 - Pairwise distances are computed using the Damerau-Levenshtein metric.
 - Mean and standard deviation are aggregated across subgroups.
 
-### 
+### 🔧 Pairwise Distance Calculation: Pandas & Spark Implementations
 The repository supports two implementations of DNA barcodes pairwise distance calculations one with Pandas and the other with Apache Spark (PySpark).
 For optimal performnace conduct experiments in two separate phases:
 
