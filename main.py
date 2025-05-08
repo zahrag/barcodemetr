@@ -102,8 +102,6 @@ if __name__ == "__main__":
                         action='store_true',
                         help='IF saving the pairwise distance of each rank in pandas? (NOTE that it is time consuming.)')
 
-    # Parse the arguments
     args = parser.parse_args()
-
     main(args)
 
