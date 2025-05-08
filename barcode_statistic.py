@@ -66,14 +66,14 @@ class BarcodeMetric:
 
         return ranked_data
 
-    def compute_sdi(self, ranked_data, enabled=False):
+    def compute_sdi(self, ranked_data, path=None):
         """
         Computes Shannon Diversity Index (SDI) for each (rank, subgroup) in the hierarchy.
         Updates the hierarchy in-place by storing 'sdi' per subgroup.
         SDI measures the diversity of barcodes within a subgroup.
         """
 
-        if not enabled:
+        if path is not None and os.path.isfile(path):
             return ranked_data
 
         for rank in ranked_data:
@@ -114,9 +114,9 @@ class BarcodeMetric:
         print(f"\nIdentical DNA Barcode Statistics: {barcode_stats}\n")
         return barcode_stats
 
-    def compute_pwd(self, ranked_data=None, taxonomy_ranks=None):
+    def compute_pwd(self, ranked_data, taxonomy_ranks=None, _enabled=False):
         """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
-        if not ranked_data:
+        if not _enabled:
             return
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
         for rank in taxonomy_ranks:
@@ -129,12 +129,24 @@ class BarcodeMetric:
         pwd_stats = {}
         for rank in taxonomy_ranks:
             if rank in ranked_data:
-                distances_root = f"{self.save_path}/distances/{rank}"
+
+                distances_root = os.path.join(self.save_path, rank)
                 if not os.path.exists(distances_root):
-                    raise ValueError(f"The directory of distances files of {rank} does NOT exist.\n "
-                                     f"Compute pairwise distances across {rank} first."
-                                     )
-                pwd_stats[rank] = self.pwd._rank_dist_stats(rank,
+                    raise FileNotFoundError(
+                        f"Distance files for rank '{rank}' not found at: {distances_root}.\n"
+                        "Please compute pairwise distances before proceeding."
+                    )
+
+                chunks = extract_chunks(rank, distances_root, method="spark")
+                if not chunks:
+                    raise ValueError(
+                        f"No distance chunks found for rank '{rank}' in: {distances_root}.\n"
+                        "Ensure pairwise distances were computed and saved correctly."
+                    )
+
+                print(f"\nFound {len(chunks)} saved chunks for rank '{rank}':\n{chunks}\n")
+
+                pwd_stats[rank] = self.pwd._rank_dist_stats(rank, chunks,
                                                             distances_root=distances_root,
                                                             save_distances_pandas=save_distances_pandas,
                                                             )
@@ -142,9 +154,9 @@ class BarcodeMetric:
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
-    def compute_full_statistics(self, ranked_data=None, save_distances_pandas=False):
+    def compute_full_statistics(self, ranked_data, save_distances_pandas=False, enabled=False):
 
-        if not ranked_data:
+        if not enabled:
             return
 
         barcode_stats = self.compute_barcodes_statistics(ranked_data)
