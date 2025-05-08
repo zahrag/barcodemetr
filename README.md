@@ -2,10 +2,30 @@
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
 At each rank, the data is structured hierarchically: every taxonomic rank consists of subgroups, and each subgroup 
-includes identical DNA barcode sequences. Figure 1 illustrates this hierarchical organization.
+includes identical DNA barcode sequences. This defines the ranked data structure derived from the [BIOSCAN-1M](https://github.com/bioscan-ml/BIOSCAN-1M)
+and [BIOSCAN-5M](https://github.com/bioscan-ml/BIOSCAN-5M) biological datasets, used for statistical analysis of DNA nucleotide barcode sequences.
+
+If you make use of the BIOSCAN-5M dataset and/or this code repository, please cite the following [paper](https://arxiv.org/abs/2406.12723):
+
+```bibtex
+@inproceedings{gharaee2024bioscan5m,
+    title={{BIOSCAN-5M}: A Multimodal Dataset for Insect Biodiversity},
+    booktitle={Advances in Neural Information Processing Systems},
+    author={Zahra Gharaee and Scott C. Lowe and ZeMing Gong and Pablo Millan Arias
+        and Nicholas Pellegrino and Austin T. Wang and Joakim Bruslund Haurum
+        and Iuliia Zarubiieva and Lila Kari and Dirk Steinke and Graham W. Taylor
+        and Paul Fieguth and Angel X. Chang
+    },
+    editor={A. Globerson and L. Mackey and D. Belgrave and A. Fan and U. Paquet and J. Tomczak and C. Zhang},
+    pages={36285--36313},
+    publisher={Curran Associates, Inc.},
+    year={2024},
+    volume={37},
+    url={https://proceedings.neurips.cc/paper_files/paper/2024/file/3fdbb472813041c9ecef04c20c2b1e5a-Paper-Datasets_and_Benchmarks_Track.pdf},
+}
+```
 
 ### DNA Barcode Sequence
-
 The DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
 and Guanine (G)—within a specific gene region, such as the mitochondrial cytochrome c oxidase subunit I (COI) gene. 
 Each nucleotide is depicted using a distinct color block to enhance visual interpretation:
