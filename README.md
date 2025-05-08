@@ -33,4 +33,28 @@ The code computes the average pairwise distances between unique DNA barcodes at 
 - Pairwise distances are computed using the Damerau-Levenshtein metric.
 - Mean and standard deviation are aggregated across subgroups.
 
+### 
+The repository supports two implementations of DNA barcodes pairwise distance calculations one with Pandas and the other with Apache Spark (PySpark).
+For optimal performnace conduct experiments in two separate phases:
+
+> **ℹ️ Note** For small size data Pandas implementation and for the large data sizes like BIOSCAN-5M Apache Spark is recommended.
+
+#### I. Calculate&Save SDI and Pairwise Distances
+To initially calculate DNA barcodes pairwise distances and save them in the Parquet files or Pandas dataframes, execute:
+
+```bash
+python main.py --method spark --compute_pwd --load_metadata --metadata_file <file-path> --ranked_data_file <file-path> --save_path <directory-path>
+``` 
+
+#### II.  Enable Statistical Processing of SDI and Pairwise Distances
+To extract the statistics based on saved sdi and pairwise distances execute:
+
+```bash
+python main.py --method spark --enable_full_stats --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
+``` 
+
+```bash
+python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
+``` 
+
 
