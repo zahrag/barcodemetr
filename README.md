@@ -1,7 +1,7 @@
 # barcodemetr
 <div align="center">
 <figure>
-<img src="figures/pic1.png" alt="DNA" class="centered-image"width="700" height="550">
+<img src="figures/pic2.png" alt="DNA" class="centered-image"width="700" height="550">
 </figure>
 </div>
 
