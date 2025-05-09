@@ -117,6 +117,7 @@ To visualize the statics execute the following:
 python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
 ``` 
 
+-----
 #### Distributions of SDI across taxonomic ranks
 <div align="center">
   <figure>
@@ -127,6 +128,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   </figure>
 </div>
 
+-----
 #### Distributions of pairwise distance across subgroups of class
 
 <div align="center">
@@ -138,6 +140,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   </figure>
 </div>
 
+-----
 #### Distributions of pairwise distance across subgroups of order
 
 <div align="center">
