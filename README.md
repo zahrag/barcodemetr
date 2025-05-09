@@ -105,7 +105,12 @@ To extract statistics from the saved SDI and pairwise distances, execute the fol
 python main.py --method spark --compute_full_statistics --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
 
-### III.  Visualization
+### III.  Visual Representation of Pairwise Distance Statistics
+The visualization summarizes the distribution of pairwise distances across taxonomic ranks: 
+class, order, and species. Each boxplot illustrates the Interquartile Range (IQR)—the range between 
+the 25th percentile (Q1) and the 75th percentile (Q3)—capturing the central 50% of the data. The median (Q2) 
+is marked by a line within the box. Whiskers extend up to 1.5×IQR from Q1 and Q3, indicating data spread and 
+helping detect outliers.
 To visualize the statics execute the following:
 
 ```bash
