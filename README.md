@@ -4,7 +4,7 @@
   <figure>
     <img src="figures/img5.png" 
          alt="class." />
-    <figcaption><b>Figure: </b>DNA Nucleotide Barcode Sequence.</figcaption>
+    <figcaption>DNA Nucleotide Barcode Sequence.</figcaption>
   </figure>
 </div>
 
