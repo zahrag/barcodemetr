@@ -1,4 +1,13 @@
 # barcodemetr
+
+<div align="center">
+  <figure>
+    <img src="figures/img1.png" 
+         alt="class." />
+    <figcaption><b>Figure: </b>DNA Nucleotide Barcode Sequence.</figcaption>
+  </figure>
+</div>
+
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
 At each rank, the data is structured hierarchically: every taxonomic rank consists of subgroups, and each subgroup 
@@ -135,7 +144,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   <figure>
     <img src="figures/class_distance_distribution.png" 
          alt="class." />
-    <figcaption><b>Figure 1: </b>Distribution of pairwise distances of subgroups of class. The x-axis shows the subgroup
+    <figcaption><b>Figure 2: </b>Distribution of pairwise distances of subgroups of class. The x-axis shows the subgroup
     categories sorted alphabetically.</figcaption>
   </figure>
 </div>
@@ -147,7 +156,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   <figure>
     <img src="figures/order_distance_distribution.png" 
          alt="order." />
-    <figcaption><b>Figure 2: </b>Distribution of pairwise distances of subgroups of order. The x-axis shows the subgroup
+    <figcaption><b>Figure 3: </b>Distribution of pairwise distances of subgroups of order. The x-axis shows the subgroup
     categories sorted alphabetically.</figcaption>
   </figure>
 </div>
@@ -161,7 +170,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   </figure>
 </div>
 <div align="left">
-  <p><b>Figure 3:</b> Distribution of pairwise distances of subgroups of species. Among the species, there are
+  <p><b>Figure 4:</b> Distribution of pairwise distances of subgroups of species. Among the species, there are
     8,372 distinct subgroups with sufficient identical barcodes for calculating pairwise distances, which
     makes visualization challenging. To address this, the groups are sorted in descending order based
     on their mean distances and partitioned into 100 bins. These bins are used to plot the distribution
