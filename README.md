@@ -2,11 +2,11 @@
 
 <div align="center">
   <figure>
-    <img src="figures/img2.png" 
-         alt="class." />
-    <figcaption><b>Figure: </b>DNA Nucleotide Barcode Sequence.</figcaption>
+    <img src="figures/img2.png" alt="class." width="400" />
+    <figcaption><b>Figure:</b> DNA Nucleotide Barcode Sequence.</figcaption>
   </figure>
 </div>
+
 
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
