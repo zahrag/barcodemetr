@@ -107,11 +107,9 @@ python main.py --method spark --compute_full_statistics --display_table --save_s
 
 ### III.  Visual Representation of Pairwise Distance Statistics
 The visualization summarizes the distribution of SDI and pairwise distances across taxonomic ranks. 
-Each boxplot illustrates the Interquartile Range (IQR)—the range between 
-the 25th percentile (Q1) and the 75th percentile (Q3)—capturing the central 50% of the data. The median (Q2) 
-is marked by a line within the box. The lines extending from the box (whiskers) indicate the range of the data outside 
-the IQR, typically extending up to 1.5 times the IQR from the quartiles, which help identify the spread of the data.
-
+Each boxplot displays the Interquartile Range (IQR)—the range between the 25th percentile (Q1) and 
+the 75th percentile (Q3)—capturing the central 50% of the data. The median (Q2) is shown as a line inside the box. 
+Whiskers extend up to 1.5 times the IQR from Q1 and Q3, indicating data spread and helping to identify potential outliers.
 
 To visualize the statics execute the following:
 
