@@ -1,13 +1,5 @@
 # barcodemetr
 
-/* Container for centering the figure */
-.figure-container {
-    text-align: center;
-    margin: 0 auto;
-    justify-content: flex-end; /* Align caption to the bottom */
-    display: flex;
-    flex-direction: column;
-}
 <figure class="figure-container">
 <img src="figures/img5.png" alt="DNA" class="centered-image" width="1500" height="717">
 <figcaption class="caption">DNA Nucleotide Barcode Sequence.</figcaption>
