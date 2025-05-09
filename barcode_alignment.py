@@ -7,20 +7,21 @@ import os
 
 
 class BarcodeAlignment:
-    def __init__(self, save_path):
+    def __init__(self, max_seq_length=None, save_path=None, remove_fasta=False):
         self.save_path = save_path
+        self.max_seq_length = max_seq_length  # Applied when using a fixed length for all barcodes
+        self.remove_fasta = remove_fasta   # Applied when lacking space to keep fasta files
 
-    def mafft_align(self, sequences, max_seq_length=None):
+    def mafft_align(self, sequences):
         """
         This function performs MAFFT alignment of a chunk of sequences without saving fasta files to disk.
         :param sequences: Chunk of sequences.
-        :param max_seq_length: Maximum length of sequences. Applied when using one fixed length for all barcodes.
         :return: Aligned sequences.
         """
 
         # Get the maximum length of the sequences
         max_length = (
-        max_seq_length if max_seq_length is not None 
+        self.max_seq_length if self.max_seq_length is not None 
         else max(len(seq) for seq in sequences)
         )
         print(f"Aligning chunk of sequences with {len(sequences)} sequences.")
@@ -50,18 +51,17 @@ class BarcodeAlignment:
         return aligned_sequences
 
 
-    def mafft_align_and_save(self, sequences, taxa, max_seq_length=None, remove_fasta=False):
+    def mafft_align_and_save(self, sequences, taxa):
         """
         This function performs MAFFT alignment of a chunk of DNA barcode sequences saving fasta files on disk.
         :param sequences: A chunk of sequences.
         :param taxa: Taxonomic rank.
-        :param max_seq_length: Maximum length of sequences. Applied when using one fixed length for all barcodes.
         :return: Aligned sequences.
         """
         # Get the maximum length of the sequences
         max_length = (
-            max_seq_length if max_seq_length is not None 
-            else max(len(seq) for seq in sequences)
+        self.max_seq_length if self.max_seq_length is not None 
+        else max(len(seq) for seq in sequences)
         )
 
         # print(f"Aligning chunk of sequences with {len(sequences)} sequences.")
@@ -94,19 +94,19 @@ class BarcodeAlignment:
         aligned_sequences = AlignIO.read(aligned_filename, "fasta")
         aligned_sequences = [str(record.seq) for record in aligned_sequences]
 
-        if remove_fasta:
+        if self.remove_fasta:
             os.remove(fasta_filename)
             os.remove(aligned_filename)
 
         return aligned_sequences
 
 
-    def perform_mafft_alignment(self, sequences, taxa, max_seq_length=None):
+    def perform_mafft_alignment(self, sequences, taxa):
 
         if self.save_path is None:
-            return self.mafft_align(sequences, max_seq_length=max_seq_length)
+            return self.mafft_align(sequences)
 
-        return self.mafft_align_and_save(sequences, taxa, max_seq_length=max_seq_length, remove_fasta=False)
+        return self.mafft_align_and_save(sequences, taxa)
 
 
 
