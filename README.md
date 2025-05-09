@@ -5,7 +5,7 @@
 </figure>
 </div>
 
------
+
 ## Overview
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
