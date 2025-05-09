@@ -2,7 +2,7 @@
 
 <div align="center">
   <figure>
-    <img src="figures/img3.png" alt="class." style="width: 50%; height: auto;" />
+    <img src="figures/img5.png" alt="class." style="width: 50%; height: auto;" />
     <figcaption><b>Figure:</b> DNA Nucleotide Barcode Sequence.</figcaption>
   </figure>
 </div>
