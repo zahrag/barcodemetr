@@ -10,18 +10,19 @@ class BarcodeAlignment:
     def __init__(self, save_path):
         self.save_path = save_path
 
-    def mafft_align(self, sequences):
+    def mafft_align(self, sequences, max_seq_length=None):
         """
         This function performs MAFFT alignment of a chunk of sequences without saving fasta files to disk.
         :param sequences: Chunk of sequences.
-        :param taxa: Taxonomic rank.
-        :param max_length: Maximum length of sequences.
+        :param max_seq_length: Maximum length of sequences. Applied when using one fixed length for all barcodes.
         :return: Aligned sequences.
         """
 
         # Get the maximum length of the sequences
-        max_length = max(len(seq) for seq in sequences)
-
+        max_length = (
+        max_seq_length if max_seq_length is not None 
+        else max(len(seq) for seq in sequences)
+        )
         print(f"Aligning chunk of sequences with {len(sequences)} sequences.")
 
         # Format sequences into FASTA format in-memory
@@ -49,15 +50,19 @@ class BarcodeAlignment:
         return aligned_sequences
 
 
-    def mafft_align_and_save(self, sequences, taxa, remove_fasta=False):
+    def mafft_align_and_save(self, sequences, taxa, max_seq_length=None, remove_fasta=False):
         """
         This function performs MAFFT alignment of a chunk of DNA barcode sequences saving fasta files on disk.
         :param sequences: A chunk of sequences.
         :param taxa: Taxonomic rank.
+        :param max_seq_length: Maximum length of sequences. Applied when using one fixed length for all barcodes.
         :return: Aligned sequences.
         """
         # Get the maximum length of the sequences
-        max_length = max(len(seq) for seq in sequences)
+        max_length = (
+            max_seq_length if max_seq_length is not None 
+            else max(len(seq) for seq in sequences)
+        )
 
         # print(f"Aligning chunk of sequences with {len(sequences)} sequences.")
         fasta_dir = f'{self.save_path}/fasta_files/{taxa}'
