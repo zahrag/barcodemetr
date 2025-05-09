@@ -1,8 +1,9 @@
 # barcodemetr
-
+<div align="center">
 <figure>
 <img src="figures/pic2.png" alt="DNA" class="centered-image"width="700" height="500">
 </figure>
+</div>
 
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
