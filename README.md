@@ -1,7 +1,7 @@
 # barcodemetr
 
 <figure>
-<img src="figures/pic2.png" alt="DNA" class="centered-image"width="800" height="600">
+<img src="figures/pic2.png" alt="DNA" class="centered-image"width="800" height="500">
 </figure>
 
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
