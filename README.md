@@ -25,7 +25,7 @@ If you make use of the BIOSCAN-5M dataset and/or this code repository, please ci
 }
 ```
 
-### DNA Barcode Sequence
+## DNA Barcode Sequence
 The DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
 and Guanine (G)—within a specific gene region, such as the mitochondrial cytochrome c oxidase subunit I (COI) gene. 
 
@@ -33,7 +33,7 @@ and Guanine (G)—within a specific gene region, such as the mitochondrial cytoc
 TTTATATTTTATTTTTGGAGCATGATCAGGAATAGTTGGAACTTCAATAAGTTTATTAATTCGAACAGAATTAAGCCAACCAGGATCAACATTTAT ....
 ```
 
-### Shannon Diversity Index (SDI)
+## Shannon Diversity Index (SDI)
 The Shannon Diversity Index (SDI) quantifies genetic diversity by considering both:
 
 - **Richness:** Number of unique DNA barcodes
@@ -73,7 +73,7 @@ The following table presents the DNA barcode statistics for various taxonomic ra
 | `BIN`       | 324,411        | 2,474,881            | 8             | 2               | 40                 | 1.29             | N/A           | N/A                |
 
 
-### Damerau-Levenshtein Distance for DNA Barcodes
+## Damerau-Levenshtein Distance for DNA Barcodes
 The Damerau-Levenshtein distance extends the standard Levenshtein metric by including adjacent character transpositions 
 in addition to insertions, deletions, and substitutions. It quantifies the similarity between DNA sequences based on 
 the minimum number of such edits required to transform one sequence into another.
@@ -86,33 +86,33 @@ The code computes the average pairwise Damerau-Levenshtein distances between uni
 - Pairwise distances are computed using the Damerau-Levenshtein metric.
 - Mean and standard deviation are aggregated across subgroups.
 
-### 🔧 Pairwise Distance Calculation: Pandas & Spark Implementations
+## 🔧 Pairwise Distance Calculation: Pandas & Spark Implementations
 The repository supports two implementations of DNA barcodes pairwise distance calculations one with Pandas and the other with Apache Spark (PySpark).
 For optimal performnace conduct experiments in two separate phases:
 
 > **ℹ️ Note** Use the Pandas implementation for small datasets. For large datasets such as BIOSCAN-5M, the Apache Spark implementation is recommended.
 
-#### I. Calculate & Save SDI and Pairwise Distances
+### I. Calculate & Save SDI and Pairwise Distances
 To calculate DNA barcode pairwise distances and save them in Parquet files or Pandas dataframes, run the following command:
 ```bash
 python main.py --method spark --compute_pwd --load_metadata --metadata_file <file-path> --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
 
-#### II.  Enable Statistical Processing of SDI and Pairwise Distances
+### II.  Enable Statistical Processing of SDI and Pairwise Distances
 To extract statistics from the saved SDI and pairwise distances, execute the following:
 
 ```bash
 python main.py --method spark --compute_full_statistics --display_table --save_statistics --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
 
-#### III.  Visualization
+### III.  Visualization
 To visualize the statics execute the following:
 
 ```bash
 python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <file-path> --ranked_data_file <file-path> --distances_path <directory-path> --save_path <directory-path>
 ``` 
 
-
+#### Distributions of SDI across taxonomic ranks
 <div align="center">
   <figure>
     <img src="figures/sdi_distributions.png" 
@@ -121,6 +121,8 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
     </figcaption>
   </figure>
 </div>
+
+#### Distributions of pairwise distance across subgroups of class
 
 <div align="center">
   <figure>
@@ -131,6 +133,8 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   </figure>
 </div>
 
+#### Distributions of pairwise distance across subgroups of order
+
 <div align="center">
   <figure>
     <img src="figures/order_distance_distribution.png" 
@@ -139,6 +143,8 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
     categories sorted alphabetically.</figcaption>
   </figure>
 </div>
+
+#### Distributions of pairwise distance across subgroups of species
 
 <div align="center">
   <figure>
