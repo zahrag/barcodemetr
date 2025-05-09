@@ -1,7 +1,7 @@
 # barcodemetr
 
 <figure>
-<img src="figures/img5.png" alt="DNA" class="centered-image" width="1000" height="500">
+<img src="figures/pic1.png" alt="DNA" class="centered-image" width="1000" height="500">
 <figcaption class="caption">DNA Nucleotide Barcode Sequence.</figcaption>
 </figure>
 
