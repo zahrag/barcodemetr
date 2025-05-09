@@ -13,7 +13,7 @@ At each rank, the data is structured hierarchically: every taxonomic rank consis
 includes identical DNA barcode sequences. This defines the ranked data structure derived from the [BIOSCAN-1M](https://github.com/bioscan-ml/BIOSCAN-1M)
 and [BIOSCAN-5M](https://github.com/bioscan-ml/BIOSCAN-5M) biological datasets, used for statistical analysis of DNA nucleotide barcode sequences.
 
-If you make use of the BIOSCAN-5M dataset and/or this code repository, please cite the following [paper](https://arxiv.org/abs/2406.12723):
+If you make use of barcodemetr code repository, please cite the following [paper](https://arxiv.org/abs/2406.12723):
 
 ```bibtex
 @inproceedings{gharaee2024bioscan5m,
