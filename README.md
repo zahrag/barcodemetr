@@ -92,7 +92,7 @@ The code computes the average pairwise Damerau-Levenshtein distances between uni
 - For groups with >1,000 sequences, 1,000 are randomly sampled.
 - Sequences are first aligned using MAFFT.
 - Pairwise distances are computed using the Damerau-Levenshtein metric.
-- Mean and standard deviation are aggregated across subgroups.
+- Mean and standard deviation are aggregated across subgroups of a taxonomic rank.
 
 ## 🔧 Pairwise Distance Calculation: Pandas & Spark Implementations
 The repository supports two implementations of DNA barcodes pairwise distance calculations one with Pandas and the other with Apache Spark (PySpark).
