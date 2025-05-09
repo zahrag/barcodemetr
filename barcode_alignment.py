@@ -101,12 +101,12 @@ class BarcodeAlignment:
         return aligned_sequences
 
 
-    def perform_mafft_alignment(self, sequences, taxa):
+    def perform_mafft_alignment(self, sequences, taxa, max_seq_length=None):
 
         if self.save_path is None:
-            return self.mafft_align(sequences)
+            return self.mafft_align(sequences, max_seq_length=max_seq_length)
 
-        return self.mafft_align_and_save(sequences, taxa, remove_fasta=False)
+        return self.mafft_align_and_save(sequences, taxa, max_seq_length=max_seq_length, remove_fasta=False)
 
 
 
