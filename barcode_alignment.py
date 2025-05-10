@@ -7,9 +7,9 @@ import os
 
 
 class BarcodeAlignment:
-    def __init__(self, max_seq_length=None, save_path=None, remove_fasta=False):
+    def __init__(self, max_barcode_length=None, save_path=None, remove_fasta=False):
         self.save_path = save_path
-        self.max_seq_length = max_seq_length  # Applied when using a fixed length for all barcodes
+        self.max_seq_length = max_barcode_length  # Applied when using a fixed length for all barcodes
         self.remove_fasta = remove_fasta   # Applied when lacking space to keep fasta files
 
     def mafft_align(self, sequences):
