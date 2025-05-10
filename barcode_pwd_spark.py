@@ -14,7 +14,7 @@ from utils import *
 
 class BarcodePWD(object):
 
-    def __init__(self, max_seq_length=None, save_path=None):
+    def __init__(self, max_barcode_length=None, save_path=None):
 
         self.save_path = save_path
 
@@ -27,7 +27,7 @@ class BarcodePWD(object):
         self.num_partitions = max(2, min(4 * self.num_cores, 100))  # Limit to a reasonable max, e.g., 100
 
         # Initialize Barcode Alignment
-        self.mafft_align = BarcodeAlignment(save_path=save_path, max_seq_length=max_seq_length)
+        self.mafft_align = BarcodeAlignment(save_path=save_path, max_barcode_length=max_barcode_length)
 
     def initialize_spark(self):
         return SparkSession.builder \

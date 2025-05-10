@@ -8,12 +8,12 @@ from utils import *
 
 class BarcodePWD(object):
 
-    def __init__(self, max_seq_length=None, save_path=None):
+    def __init__(self, max_barcode_length=None, save_path=None):
 
         self.save_path = save_path
 
         # Initialize Barcode Alignment
-        self.mafft_align = BarcodeAlignment(save_path=save_path, max_seq_length=max_seq_length)
+        self.mafft_align = BarcodeAlignment(save_path=save_path, max_barcode_length=max_barcode_length)
 
     def _damerau_levenshtein_distance(self, aligned_sequences):
         """
