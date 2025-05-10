@@ -100,7 +100,7 @@ class BarcodePWD(object):
             # ---- Save dataframe of pairwise distance of subgroups in the chunk chk
             path = path if path is not None else self.save_path
 
-            file_path = os.path.join(path, rank, f"chunk_{chk}", f'barcode_pwd_{rank}_chunk_{chk}.csv')
+            file_path = os.path.join(path, rank, f"chunk_{chk}", f"barcodes_pwd_{rank}_chunk_{chk}.csv")
             if not os.path.exists(os.path.dirname(file_path)):
                 os.makedirs(os.path.dirname(file_path))
 
