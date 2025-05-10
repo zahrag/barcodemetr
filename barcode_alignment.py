@@ -7,10 +7,16 @@ import os
 
 
 class BarcodeAlignment:
+    """ DNA Barcode Alignment Module """
     def __init__(self, max_barcode_length=None, save_path=None, remove_fasta=False):
+        """
+        :param max_barcode_length: Maximum length of DNA barcode, applied when using a fixed length for all barcodes.
+        :param save_path: Path to save fasta files.
+        :param remove_fasta: Whether to remove fasta file post alignment; applied if lacking space to keep seqs fasta files
+        """
         self.save_path = save_path
-        self.max_seq_length = max_barcode_length  # Applied when using a fixed length for all barcodes
-        self.remove_fasta = remove_fasta   # Applied when lacking space to keep fasta files
+        self.max_seq_length = max_barcode_length  #
+        self.remove_fasta = remove_fasta
 
     def mafft_align(self, sequences):
         """
