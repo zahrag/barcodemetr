@@ -125,13 +125,17 @@ class BarcodePWD(object):
 
     def _subgroup_dist_stats(self, distances_data):
         """
-        In biological contexts (e.g., DNA sequences), the variance of distances (e.g., pairwise genetic distances)
-        can indicate genetic diversity within a group.
-        Low Variance in Genetic Distance: This implies that the sequences are quite similar to each other, indicating low genetic diversity.
-        High Variance in Genetic Distance: This suggests more genetic diversity, with some sequences being significantly different from others.
+        Compute unique DNA barcode descriptive statistics such as min, max median, variance and standard deviation.
+
+        NOTE that in biological contexts (e.g., DNA sequences), the variance of distances (e.g., pairwise genetic distances)
+        can indicate genetic diversity within a group:
+        - Low Variance in Genetic Distance: This implies that the sequences are quite similar to each other,
+                                            indicating low genetic diversity.
+        - High Variance in Genetic Distance: This suggests more genetic diversity, with some sequences being
+                                             significantly different from others.
 
         :param distances_data:
-        :return:
+        :return: Statistics dictionary.
         """
 
         # Check if repartitioning is necessary
