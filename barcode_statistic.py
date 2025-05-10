@@ -23,9 +23,9 @@ class BarcodeMetric:
             os.makedirs(self.save_path)
 
         if method == "pandas":
-            self.pwd = bar_pwd_panda(save_path=self.save_path, max_seq_length=max_barcode_length)
+            self.pwd = bar_pwd_panda(save_path=self.save_path, max_barcode_length=max_barcode_length)
         else:
-            self.pwd = bar_pwd_spark(save_path=self.save_path, max_seq_length=max_barcode_length)
+            self.pwd = bar_pwd_spark(save_path=self.save_path, max_barcode_length=max_barcode_length)
 
     def sdi(self, sample_counts):
         proportions = np.array(sample_counts) / sum(sample_counts)
