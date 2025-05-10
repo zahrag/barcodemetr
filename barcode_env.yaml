@@ -16,6 +16,6 @@ dependencies:
   - pyspark=3.5.1
   - pip
   - pip:
-        - argparse  # only needed via pip if not using Python ≥3.2 where argparse is built-in
+        - argparse
 
 
