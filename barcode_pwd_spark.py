@@ -14,8 +14,12 @@ from utils import *
 
 class BarcodePWD(object):
     """ DNA Barcodes Pairwise Distance Calculator by Apache Spark"""
-    def __init__(self, max_barcode_length=None, save_path=None):
 
+    def __init__(self, max_barcode_length=None, save_path=None):
+        """
+       :param max_barcode_length: Maximum DNA barcode length applied for alignment.
+       :param save_path: Path to save resulting files.
+       """
         self.save_path = save_path
 
         # try
