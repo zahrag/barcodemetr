@@ -13,9 +13,9 @@ def convert_to_regular_dict(d):
         d = {k: convert_to_regular_dict(v) for k, v in d.items()}
     return d
 
-def print_table(data_dict, title="", display_table=False):
+def display_table(data_dict, title="", _display=False):
 
-    if not display_table:
+    if not _display:
         return
 
     print("\n\n" + "+" + "-" * 143 + "+")

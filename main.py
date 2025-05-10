@@ -32,10 +32,10 @@ def main(configs):
                                                          )
 
     # Print full statistics
-    print_table(barcode_stats_full,
-                title="Full Statistics of Identical DNA Barcodes",
-                display_table=configs.display_table,
-                )
+    display_table(barcode_stats_full,
+                  title="Full Statistics of Identical DNA Barcodes",
+                  _display=configs.display_table,
+                  )
 
     save_in_pandas(barcode_stats_full,
                    os.path.join(barmetr.save_path, "barcode_stats.csv"),
