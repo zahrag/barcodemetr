@@ -103,7 +103,7 @@ For optimal performnace conduct experiments in two separate phases:
 ### I. Calculate & Save SDI and Pairwise Distances
 To calculate DNA barcode pairwise distances and save them in Parquet files or Pandas dataframes, run the following command:
 ```bash
-python main.py --method <spark/pads> --compute_pwd --load_metadata --metadata_file <file-path> --ranked_data_file <file-path> --save_path <directory-path>
+python main.py --method <spark/padas> --compute_pwd --load_metadata --metadata_file <file-path> --ranked_data_file <file-path> --save_path <directory-path>
 ``` 
 
 ### II.  Enable Statistical Processing of SDI and Pairwise Distances
