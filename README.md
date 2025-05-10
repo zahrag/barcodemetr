@@ -160,6 +160,7 @@ python visualization.py --create_plots --rank <Taxonomic-rank> --metadata_file <
   </figure>
 </div>
 
+-----
 #### Distributions of pairwise distance across subgroups of species
 
 <div align="center">
