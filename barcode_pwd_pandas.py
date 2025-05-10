@@ -7,12 +7,14 @@ from barcode_alignment import BarcodeAlignment
 from utils import *
 
 class BarcodePWD(object):
+    """ DNA Barcodes Pairwise Distance Calculator by Pandas"""
 
     def __init__(self, max_barcode_length=None, save_path=None):
-        """ DNA Barcodes Pairwise Distance Calculator by Pandas"""
-
+        """
+        :param max_barcode_length: Maximum DNA barcode length applied for alignment.
+        :param save_path: Path to save resulting files.
+        """
         self.save_path = save_path
-
         # Initialize Barcode Alignment
         self.mafft_align = BarcodeAlignment(save_path=save_path, max_barcode_length=max_barcode_length)
 
