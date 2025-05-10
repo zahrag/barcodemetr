@@ -11,6 +11,7 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 class BarcodeMetric:
     """ Main class to compute barcode statistics."""
+
     def __init__(self, method="pandas", max_barcode_length=625, metadata_file="", save_path="", load_metadata=False):
         """
         :param method (str): Method to compute barcode statistics; spark or pandas.
