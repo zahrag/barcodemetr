@@ -117,8 +117,8 @@ class BarcodePWD(object):
         df_pandas = None
         for chk_num, chk in tqdm(enumerate(chunks), total=len(chunks), desc=f"Processing statistics of {rank}"):
 
-            dist_file = os.path.join(distances_root, f"chunk_{chk}", f"barcodes_pwd_{rank}_chunk_{chk}.csv")
-            df = pd.read_csv(dist_file, low_memory=False)
+            file_path = os.path.join(distances_root, f"chunk_{chk}", f"barcodes_pwd_{rank}_chunk_{chk}.csv")
+            df = pd.read_csv(file_path, low_memory=False)
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
 
