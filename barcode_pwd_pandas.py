@@ -70,6 +70,7 @@ class BarcodePWD(object):
     def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
         This function process distance computation per taxonomic rank using pandas.
+
         :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param min_barcodes: Minimum number of barcodes per subgroups to compute pairwise distances.
@@ -114,6 +115,7 @@ class BarcodePWD(object):
 
         """
         Compute pairwise distance statistics across taxonomic levels.
+
         :param rank: Taxonomic group level (e.g., family, genus, species).
         :param chunks: Available chunks of the subgroups of the rank.
         :param distances_root: Root path of the distances directory.
