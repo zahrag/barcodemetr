@@ -28,7 +28,7 @@ def main(configs):
     # Compute the full statistics of the identical DNA barcodes
     barcode_stats_full = barmetr.compute_full_statistics(ranked_data,
                                                          save_distances_pandas=configs.save_distances_pandas,
-                                                         enabled=configs.compute_full_statistics,
+                                                         _enabled=configs.compute_full_statistics,
                                                          )
 
     # Print full statistics

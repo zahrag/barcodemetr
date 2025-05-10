@@ -156,9 +156,9 @@ class BarcodeMetric:
         print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
-    def compute_full_statistics(self, ranked_data, save_distances_pandas=False, enabled=False):
+    def compute_full_statistics(self, ranked_data, save_distances_pandas=False, _enabled=False):
 
-        if not enabled:
+        if not _enabled:
             return
 
         barcode_stats = self.compute_barcodes_statistics(ranked_data)
