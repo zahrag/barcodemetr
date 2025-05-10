@@ -13,7 +13,7 @@ from utils import *
 
 
 class BarcodePWD(object):
-
+    """ DNA Barcodes Pairwise Distance Calculator by Apache Spark"""
     def __init__(self, max_barcode_length=None, save_path=None):
 
         self.save_path = save_path
@@ -194,8 +194,8 @@ class BarcodePWD(object):
           This function process distance computation per taxonomic rank using pandas.
           :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
           :param rank: Taxonomic group level (e.g., family, genus, species).
-          :param min_barcodes: Minimum number of barcodes per rank to compute pairwise distances.
-          :param max_barcodes: Maximum number of barcodes per rank randomly sampled to compute pairwise distances.
+          :param min_barcodes: Minimum number of barcodes per subgroups to compute pairwise distances.
+          :param max_barcodes: Maximum number of barcodes per subgroups randomly sampled to compute pairwise distances.
           :param chunk_size: Chunk size of the subgroups of the rank.
           """
 
@@ -239,7 +239,9 @@ class BarcodePWD(object):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
-        :param max_chunk: Maximum number of chunks of the subgroups of the rank.
+        :param chunks: Available chunks of the subgroups of the rank.
+        :param distances_root: Root path of the distances directory.
+        :param save_distances_pandas: Covert and save to Pandas dataframe as a parquet file.
         """
 
         rank_stats = None
@@ -251,7 +253,7 @@ class BarcodePWD(object):
             df = self._load_from_parquet(distances_dir)
             df_spark = df if df_spark is None else df_spark.union(df)
 
-            # Group by 'group_name' and calculate statistics for each group of the chunk
+            # Group by 'subgroup_name' and calculate statistics for each group of the chunk
             stats_df = df.groupBy("subgroup_name").agg(
                 F.mean("distance").alias("mean"),
                 F.variance("distance").alias("variance"),
@@ -285,7 +287,7 @@ class BarcodePWD(object):
             "PWD-Max": aggregated_row["mean_of_max"]
         }
 
-        # Additionally save distances in Pandas dataframe
+        # Additionally convert and save distances in Pandas dataframe only if necessary: timely expensive
         path_pd = os.path.join(self.save_path, f"barcodes_pwd_{rank}.csv")
         save_in_pandas(df_spark, path_pd, _save=save_distances_pandas)
 
