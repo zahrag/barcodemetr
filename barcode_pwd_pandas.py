@@ -9,6 +9,7 @@ from utils import *
 class BarcodePWD(object):
 
     def __init__(self, max_barcode_length=None, save_path=None):
+        """ DNA Barcodes Pairwise Distance Calculator by Pandas"""
 
         self.save_path = save_path
 
@@ -69,9 +70,10 @@ class BarcodePWD(object):
         This function process distance computation per taxonomic rank using pandas.
         :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
         :param rank: Taxonomic group level (e.g., family, genus, species).
-        :param min_barcodes: Minimum number of barcodes per rank to compute pairwise distances.
-        :param max_barcodes: Maximum number of barcodes per rank randomly sampled to compute pairwise distances.
+        :param min_barcodes: Minimum number of barcodes per subgroups to compute pairwise distances.
+        :param max_barcodes: Maximum number of barcodes per subgroups randomly sampled to compute pairwise distances.
         :param chunk_size: Chunk size of the subgroups of the rank.
+        :param path: Path to save the resulting dataframes.
         """
 
         tuple_list = [
@@ -111,6 +113,8 @@ class BarcodePWD(object):
         """
         Compute pairwise distance statistics across taxonomic levels.
         :param rank: Taxonomic group level (e.g., family, genus, species).
+        :param chunks: Available chunks of the subgroups of the rank.
+        :param distances_root: Root path of the distances directory.
         """
 
         rank_stats = None
@@ -122,7 +126,7 @@ class BarcodePWD(object):
 
             df_pandas = df if df_pandas is None else pd.concat([df_pandas, df], ignore_index=True)
 
-            # Group by 'group_name' and calculate statistics for each group of the chunk
+            # Group by 'subgroup_name' and calculate statistics for each group of the chunk
             stats_df = df.groupby("group_name").agg(
                 mean=("distance", "mean"),
                 variance=("distance", "var"),
