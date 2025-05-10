@@ -10,8 +10,15 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 
 class BarcodeMetric:
-
+    """ Main class to compute barcode statistics."""
     def __init__(self, method="pandas", max_barcode_length=625, metadata_file="", save_path="", load_metadata=False):
+        """
+        :param method (str): Method to compute barcode statistics; spark or pandas.
+        :param max_barcode_length (int, Optional): Maximum barcode length applied in alignment.
+        :param metadata_file (str): Path to metadata file.
+        :param save_path (str): Path to save resulting files.
+        :param load_metadata (boolean): If load the metadata file; True only to compute pairwise distances.
+        """
 
         self.metadata = metadata_file
         self.df = load_from_pandas(metadata_file, load_file=load_metadata)
@@ -28,6 +35,7 @@ class BarcodeMetric:
             self.pwd = bar_pwd_spark(save_path=self.save_path, max_barcode_length=max_barcode_length)
 
     def sdi(self, sample_counts):
+        """ Compute the Shannon Diversity Index across a subgroup from its counts of unique DNA barcodes"""
         proportions = np.array(sample_counts) / sum(sample_counts)
         sdi = -np.sum(proportions * np.log2(proportions + 1e-12))
         return sdi
@@ -39,7 +47,7 @@ class BarcodeMetric:
         Args:
             df (pd.DataFrame, optional): DataFrame to use instead of reading from file.
             taxonomy_ranks (list, optional): Taxonomic ranks to process.
-            path (str, optional): Path to a pickled hierarchy file to load.
+            path (str): Path to a pickled hierarchy file to load.
 
         Returns:
             dict: Nested hierarchy of barcodes.
@@ -68,8 +76,8 @@ class BarcodeMetric:
 
     def compute_sdi(self, ranked_data, path=None):
         """
-        Computes Shannon Diversity Index (SDI) for each (rank, subgroup) in the hierarchy.
-        Updates the hierarchy in-place by storing 'sdi' per subgroup.
+        Computes Shannon Diversity Index (SDI) across subgroups of each rank in the hierarchy.
+        Updates the ranked data dict in-place by storing 'sdi' per subgroup.
         SDI measures the diversity of barcodes within a subgroup.
         """
 
@@ -87,6 +95,7 @@ class BarcodeMetric:
         return convert_to_regular_dict(ranked_data)
 
     def compute_barcodes_statistics(self, ranked_data):
+        """Compute unique DNA barcode descriptive statistics"""
 
         barcode_stats = {}
         for rank in ranked_data:
@@ -111,11 +120,11 @@ class BarcodeMetric:
                 'Std.Dev Shannon Diversity Index': np.std(sdi_lst),
             }
 
-        print(f"\nIdentical DNA Barcode Statistics: {barcode_stats}\n")
+        print(f"\nUnique DNA Barcode Statistics: {barcode_stats}\n")
         return barcode_stats
 
     def compute_pwd(self, ranked_data, taxonomy_ranks=None, _enabled=False):
-        """ Compute Damerau-Levenshtein pairwise distances of the identical DNA barcodes for a taxonomy rank"""
+        """ Compute Damerau-Levenshtein pairwise distances of the unique DNA barcodes for a taxonomy rank"""
         if not _enabled:
             return
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
@@ -124,7 +133,7 @@ class BarcodeMetric:
         self.pwd._end_spark()
 
     def compute_pwd_statistics(self, ranked_data, taxonomy_ranks=None, save_distances_pandas=False):
-
+        """ Compute Damerau-Levenshtein pairwise distances statistics"""
         taxonomy_ranks = taxonomy_ranks if taxonomy_ranks is not None else self.taxonomy_ranks
 
         pwd_stats = {}
@@ -153,11 +162,11 @@ class BarcodeMetric:
                                                             )
 
         self.pwd._end_spark()
-        print(f"Identical DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
+        print(f"Unique DNA Barcode Pairwise Distance Statistics: {pwd_stats}")
         return pwd_stats
 
     def compute_full_statistics(self, ranked_data, save_distances_pandas=False, _enabled=False):
-
+        """ Compute full statistics of the unique DNA barcodes"""
         if not _enabled:
             return
 
