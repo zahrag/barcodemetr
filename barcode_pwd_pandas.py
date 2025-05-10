@@ -69,7 +69,7 @@ class BarcodePWD(object):
 
     def _rank_dist(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
-        This function process distance computation per taxonomic rank using pandas.
+        This function process distance computation per taxonomic rank.
 
         :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
         :param rank: Taxonomic group level (e.g., family, genus, species).
