@@ -32,6 +32,18 @@ If you make use of *barcodemetrics* code repository, please cite the following [
     url={https://proceedings.neurips.cc/paper_files/paper/2024/file/3fdbb472813041c9ecef04c20c2b1e5a-Paper-Datasets_and_Benchmarks_Track.pdf},
 }
 ```
+## Getting Started 
+To set up the environment required for the Barcode Metrics project, use the provided barcode_env.yaml file:
+
+#### Step 1: Create the Conda Environment
+```bash
+conda env create -f barcode_env.yaml
+````
+
+#### Step 2: Activate the Environment
+```bash
+conda activate barcode_env
+````
 
 ## DNA Barcode Sequence
 The DNA barcode sequence highlights the arrangement of the four nucleotides—Adenine (A), Thymine (T), Cytosine (C), 
