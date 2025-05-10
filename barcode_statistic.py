@@ -11,7 +11,7 @@ from barcode_pwd_spark import BarcodePWD as bar_pwd_spark
 
 class BarcodeMetric:
 
-    def __init__(self, method="pandas", metadata_file="", save_path="", load_metadata=False):
+    def __init__(self, method="pandas", max_barcode_length=625, metadata_file="", save_path="", load_metadata=False):
 
         self.metadata = metadata_file
         self.df = load_from_pandas(metadata_file, load_file=load_metadata)
@@ -23,9 +23,9 @@ class BarcodeMetric:
             os.makedirs(self.save_path)
 
         if method == "pandas":
-            self.pwd = bar_pwd_panda(save_path=self.save_path)
+            self.pwd = bar_pwd_panda(save_path=self.save_path, max_seq_length=max_barcode_length)
         else:
-            self.pwd = bar_pwd_spark(save_path=self.save_path)
+            self.pwd = bar_pwd_spark(save_path=self.save_path, max_seq_length=max_barcode_length)
 
     def sdi(self, sample_counts):
         proportions = np.array(sample_counts) / sum(sample_counts)
