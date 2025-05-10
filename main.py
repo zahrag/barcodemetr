@@ -68,6 +68,7 @@ if __name__ == "__main__":
                         type=str,
                         default="",
                         help="Path to save the results", )
+
     parser.add_argument("--max_barcode_length",
                         type=int,
                         default=625,
