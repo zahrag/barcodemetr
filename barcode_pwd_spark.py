@@ -125,7 +125,7 @@ class BarcodePWD(object):
 
     def _subgroup_dist_stats(self, distances_data):
         """
-        Compute unique DNA barcode descriptive statistics such as min, max median, variance and standard deviation.
+        For a subgroup, compute unique DNA barcode distance descriptive statistics such as min, max median, variance and standard deviation.
 
         NOTE that in biological contexts (e.g., DNA sequences), the variance of distances (e.g., pairwise genetic distances)
         can indicate genetic diversity within a group:
@@ -199,7 +199,7 @@ class BarcodePWD(object):
 
     def _rank_dists(self, rank_hierarchy, rank, min_barcodes=4, max_barcodes=1000, chunk_size=1000, path=None):
         """
-          This function process distance computation per taxonomic rank using pandas.
+          This function process distance computation per taxonomic rank.
           :param rank_hierarchy: Data hierarchy at a specified taxonomic level.
           :param rank: Taxonomic group level (e.g., family, genus, species).
           :param min_barcodes: Minimum number of barcodes per subgroups to compute pairwise distances.
