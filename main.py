@@ -7,6 +7,7 @@ from utils import *
 def main(configs):
 
     barmetr = BarcodeMetric(method=configs.method,
+                            max_barcode_length=configs.max_barcode_length,
                             metadata_file= configs.metadata_file,
                             load_metadata=configs.load_metadata,
                             save_path=configs.save_path,
@@ -67,6 +68,10 @@ if __name__ == "__main__":
                         type=str,
                         default="",
                         help="Path to save the results", )
+    parser.add_argument("--max_barcode_length",
+                        type=int,
+                        default=625,
+                        help="Maximum barcode length applied to align barcodes.", )
 
     parser.add_argument('--load_metadata',
                         default=False,
