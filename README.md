@@ -9,8 +9,8 @@
 ## Overview
 This repository contains code for analyzing DNA nucleotide barcode sequences. 
 The DNA nucleotide sequences are organized by taxonomic ranks—phylum, class, order, family, subfamily, genus, and species. 
-At each rank, the data is structured hierarchically: every taxonomic rank consists of subgroups, and each subgroup 
-includes identical DNA barcode sequences. This defines the ranked data structure derived from the [BIOSCAN-1M](https://github.com/bioscan-ml/BIOSCAN-1M)
+Every taxonomic rank consists of subgroups, and each subgroup 
+includes identical DNA barcode sequences. This defines the data structure derived from the [BIOSCAN-1M](https://github.com/bioscan-ml/BIOSCAN-1M)
 and [BIOSCAN-5M](https://github.com/bioscan-ml/BIOSCAN-5M) biological datasets, used for statistical analysis of DNA nucleotide barcode sequences.
 
 If you make use of *barcodemetrics* code repository, please cite the following [paper](https://arxiv.org/abs/2406.12723):
