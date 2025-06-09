@@ -113,7 +113,6 @@ class BarcodePWD(object):
         # Create a cross join to get all pairwise combinations
         cross_df = seq_df.crossJoin(seq_df.withColumnRenamed("sequence", "sequence2"))
 
-        # For now, using a standard UDF 
         distances_df = cross_df.withColumn("distance",
                                            F.udf(lambda s1, s2: textdistance.damerau_levenshtein(s1, s2))("sequence",
                                                                                                           "sequence2"))
